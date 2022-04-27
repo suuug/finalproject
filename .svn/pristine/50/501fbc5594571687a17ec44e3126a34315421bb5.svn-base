@@ -1,0 +1,72 @@
+package kr.or.workTogether.attendance.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.workTogether.attendance.mapper.AttendanceMapper;
+import kr.or.workTogether.attendance.service.AttendanceService;
+import kr.or.workTogether.common.vo.AtndnAplictVO;
+import kr.or.workTogether.common.vo.AtndnDlyVO;
+
+@Service
+public class AttendanceServiceImpl implements AttendanceService {
+
+	@Autowired
+	AttendanceMapper attendanceMapper;
+	
+	@Override
+	public List<AtndnDlyVO> state(HashMap<String, String> map) {
+		return attendanceMapper.state(map);
+	}
+
+	@Override
+	public List<AtndnAplictVO> apply() {
+		return attendanceMapper.apply();
+	}
+
+	@Override
+	public List<AtndnDlyVO> stateMem() {
+		return attendanceMapper.stateMem();
+	}
+
+	@Override
+	public List<AtndnAplictVO> applyMem() {
+		return attendanceMapper.applyMem();
+	}
+
+	@Override
+	public int recordStart(AtndnDlyVO atndnDlyVO) {
+		return attendanceMapper.recordStart(atndnDlyVO);
+	}
+
+	@Override
+	public int getCountAtndnDly(String empId) {
+		return attendanceMapper.getCountAtndnDly(empId);
+	}
+
+	@Override
+	public int recordEnd(AtndnDlyVO atndnDlyVO) {
+		return attendanceMapper.recordEnd(atndnDlyVO);
+	}
+
+	@Override
+	public int getCountAtndnEndDt(String empId) {
+		return attendanceMapper.getCountAtndnEndDt(empId);
+	}
+
+	@Override
+	public AtndnDlyVO getAtndnDlyVO(AtndnDlyVO atndnDlyVO) {
+		return attendanceMapper.getAtndnDlyVO(atndnDlyVO);
+	}
+
+	@Override
+	public AtndnDlyVO dateSelectType(AtndnDlyVO atndnDlyVO) {
+		return attendanceMapper.dateSelectType(atndnDlyVO);
+	}
+	
+	
+
+}

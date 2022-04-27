@@ -1,0 +1,15 @@
+package kr.or.workTogether.schedule.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.workTogether.common.vo.CalendarVO;
+import kr.or.workTogether.common.vo.ScheduleVO;
+
+@Mapper
+public interface ScheduleMapper {
+
+	//일정보이기
+	public List<CalendarVO> calendar(String schdlId);
+}

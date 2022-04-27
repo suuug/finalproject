@@ -1,0 +1,218 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!-- <script type="text/javascript" src="/resources/js/jquery-latest.min.js"></script> -->
+<script type="text/javascript" src="/resources/js/jspdf.min.js"></script>
+<script type="text/javascript" src="/resources/js/html2canvas.min.js"></script>
+<script type="text/javascript" src="/resources/js/html2pdf.bundle.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var formObj = $("#detailForm");
+		
+			//수정
+			$("#but1").on("click",function(){
+			//alert("test");
+				$(".form-control").attr("readonly",false);
+				$("#susac").hide();
+				$("#okno").show();
+				$("#state").show();
+			})
+			
+			//삭제
+			$("#but2").on("click",function(){
+				formObj.attr("action", "/human/delete");
+				formObj.attr("method", "post");
+				formObj.submit();
+			})
+			
+			//확인
+			$("#but3").on("click",function(){
+				formObj.attr("action", "/human/update");
+ 				formObj.attr("method", "post");
+ 				formObj.submit();
+			})
+			
+			//취소
+			$("#but4").on("click",function(){
+				location.href="/human/detail?empId=${employeeVO.empId}"
+			})
+		})	
+	</script>
+<form:form modelAttribute="employeeVO" id='detailForm' 
+	enctype="multipart/form-data">  
+<div class="page-content">
+          <div class="container-fluid">
+			<!-- start page title -->
+              <div class="row">
+                  <div class="col-12">
+                      <div class="page-title-box d-flex align-items-center justify-content-between">
+                          <h4 class="mb-0">직원 상세</h4>
+
+                      </div>
+                  </div>
+              </div>
+              <!-- end page title -->
+
+              <div class="row">
+                  <div class="col-12">
+                      <div class="card">
+                          <div class="card-body">
+
+							  <div class="row mb-3">
+                                  <label for="example-number-input" class="col-sm-2 col-form-label">증명사진</label>
+                                  <div class="col-sm-10">
+                                      <input type="file" readonly="true" class="form-control" id="input_imgs" name="uploadFile" multiple value="${employeeVO.empPhoto}"/>
+                                  </div>
+                              </div>
+
+                              <div class="row mb-3">
+                                  <label for="example-text-input" class="col-sm-2 col-form-label">직원번호</label>
+                                  <div class="col-sm-10">
+                                      <form:input class="form-control" readonly="true" path="empId" placeholder="EMPL00001" value="${employeeVO.empId}" />
+                                      
+                                  </div>
+                              </div>
+                              <div class="row mb-3">
+                                  <label for="example-password-input" class="col-sm-2 col-form-label">비밀번호</label>
+                                  <div class="col-sm-10">
+                                      <form:input class="form-control" readonly="true" path="empPassword"  type="password" placeholder="******" value="${employeeVO.empPassword}"/>
+                                  		
+                                  </div>
+                              </div>
+                    
+                              <div class="row mb-3">
+                                  <label for="example-search-input" class="col-sm-2 col-form-label">성명</label>
+                                  <div class="col-sm-10">
+                                      <form:input class="form-control" readonly="true" path="empName" placeholder="백이진" value="${employeeVO.empName}"/>
+                                  		
+                                  </div>
+                              </div>
+                              <div class="row mb-3">
+                                  <label for="example-email-input" class="col-sm-2 col-form-label">생년월일</label>
+                                  <div class="col-sm-10">
+                                    <p id="sg" style="display:none"><fmt:formatDate value='${employeeVO.empBirth}' pattern='yyyy-MM-dd' /></p>
+                                      <form:input class="form-control" type="date" readonly="true" path="empBirth" placeholder="1994/02/22" 
+                                     	 value=""/>  
+                                  </div>
+                                  <script>
+                                      document.getElementById("empBirth").value = document.getElementById("sg").innerHTML;
+                                  </script>
+                              </div>
+                              <div class="row mb-3">
+                                  <label for="example-url-input" class="col-sm-2 col-form-label">연락처</label>
+                                  <div class="col-sm-10">
+                                      <form:input class="form-control" readonly="true" path="empTel" placeholder="010-1234-5678" value="${employeeVO.empTel}"/>
+                                  	
+                                  </div>
+                              </div>
+                              <div class="row mb-3">
+                                  <label for="example-tel-input" class="col-sm-2 col-form-label">이메일</label>
+                                  <div class="col-sm-10">
+                                      <form:input class="form-control" readonly="true" path="empEmail" placeholder="naver@naver.com" value="${employeeVO.empEmail}"/>
+                                  </div>
+                              </div>
+                              
+                              <div class="row mb-3" style="display:none;" id="state">
+                                  <label for="empState" class="col-sm-2 col-form-label">재직 상태</label>
+                                  <div class="col-sm-10">
+                                      <form:select path="empState" readonly="true" class="form-control select2-search-disable select2-hidden-accessible"  data-select2-id="6" tabindex="-1" aria-hidden="true" value="${employeeVO.empState}">                                   
+                                          <option value="H101" data-select2-id="83">재직</option>
+                                          <option value="H102" data-select2-id="84">퇴사</option>
+                                          <option value="H103" data-select2-id="85">휴직</option>
+                                  </form:select>
+                                  </div>
+                              </div>
+                     
+                              <div class="row mb-3">
+                                  <label for="empPosition" readonly="true" id="state" class="col-sm-2 col-form-label">직원 직급</label>
+                                   <div class="col-sm-10">
+                                  <form:select path="empPosition" readonly="true" class="form-control select2-search-disable select2-hidden-accessible" data-select2-id="6" tabindex="-1" aria-hidden="true" value="${employeeVO.empPosition}">                                   
+                                          <option value="H201" data-select2-id="83">부장</option>
+                                          <option value="H202" data-select2-id="84">과장</option>
+                                          <option value="H203" data-select2-id="85">대리</option>
+                                          <option value="H204" data-select2-id="86">주임</option>
+                                          <option value="H205" data-select2-id="86">사원</option>
+                                  </form:select>
+                                  </div>
+                              </div>
+                              
+                              <div class="row mb-3">
+                                  <label for="deptId" readonly="true" class="col-sm-2 col-form-label">부서</label>
+                                   <div class="col-sm-10">
+                                  <form:select path="deptId" readonly="true" class="form-control select2-search-disable select2-hidden-accessible" data-select2-id="6" tabindex="-1" aria-hidden="true" value="${employeeVO.deptId}">                                   
+                                          <option value="DEP01" data-select2-id="83">관리부</option>
+                                          <option value="DEP02" data-select2-id="84">마케팅부</option>
+                                          <option value="DEP03" data-select2-id="85">개발부</option>
+                                          <option value="DEP04" data-select2-id="86">영업부</option>
+                                  </form:select>
+                                  </div>
+                              </div>
+                              
+                              <div class="row mb-3">
+                                  <label for="example-password-input" class="col-sm-2 col-form-label">직원 주소</label>
+                                  <div class="col-sm-7">
+                                      <form:input path="empPostno" readonly="true" class="form-control" value="${employeeVO.empPostno}"/>
+                                  </div>
+						          <button type="button" onclick="openHomeSearch()" class="btn btn-primary btn-icon-split btn-sm col-sm-2">
+							          <span class="text">우편번호 검색</span>
+							      </button>
+                              </div>
+                              
+							    <div class="row mb-3">
+                                  <label for="example-number-input" class="col-sm-2 col-form-label">주소</label>
+                                  <div class="col-sm-10">
+                                      <form:input path="empAddr1" readonly="true" class="form-control" type="text" value="${employeeVO.empAddr1}" />
+                                  </div>
+                                </div>
+							  
+                              <div class="row mb-3">
+                                  <label for="example-number-input" class="col-sm-2 col-form-label">상세주소</label>
+                                  <div class="col-sm-10">
+                                      <form:input path="empAddr2" readonly="true" class="form-control" type="text" value="${employeeVO.empAddr2}" />
+                                  </div>
+                                </div>
+                              
+                           <div class="row mb-3">
+                                  <label for="example-url-input" class="col-sm-2 col-form-label">이력서</label>
+                                  <div class="col-sm-10">
+                                      <form:input class="form-control" readonly="true" path="empResume" value="${employeeVO.empResume}"/>
+                                  </div>
+                              </div>
+                           <div class="row mb-3">
+                                  <label for="example-url-input" class="col-sm-2 col-form-label">입사 일자</label>
+                                  <div class="col-sm-10">
+                                      <p id="ip" style="display:none"><fmt:formatDate value='${employeeVO.empEcnyYmd}' pattern="yyyy-MM-dd" /></p>
+	                                        <form:input class="form-control" readonly="true" path="empEcnyYmd" type="date" 
+	                                      	value="" />
+											
+                                      <font color="red" style="font-size:8pt;">
+							            	<form:errors path="empEcnyYmd" />
+							           </font>
+                                  </div>
+                                  <script>
+                                  	document.getElementById("empEcnyYmd").value = document.getElementById("ip").innerHTML;
+                                  </script>
+                              </div>
+                           
+					          <div class="form-group" id="susac" style="float:right;">
+								<button id="but1" type="button" class="mb-2 btn btn-sm btn-success mr-1">수정</button>
+								<button id="but2" type="button" class="mb-2 btn btn-sm btn-danger mr-1">삭제</button>
+							  </div>
+					          <div class="form-group" id="okno" style="float:right; display:none;">
+								<button id="but3" type="button" class="mb-2 btn btn-sm btn-success mr-1">확인</button>
+								<button id="but4" type="button" class="mb-2 btn btn-sm btn-danger mr-1">취소</button>
+							  </div>
+                              
+                          </div>
+                      </div>
+                  </div> <!-- end col -->
+              </div>
+              <!-- end row -->
+
+          </div> <!-- container-fluid -->
+      </div>
+</form:form>

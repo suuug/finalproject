@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.workTogether.authorization.mapper.AuthorizationMapper">
+	
+	<!-- 조직도를 위한 MAP(시작)-->
+	<resultMap type="departmentVO" id="departmentMap">
+		<id property="topDeptId" column="TOP_DEPT_ID" />
+		<result property="deptLevel" column="DEPT_LEVEL" />
+		<result property="topDeptName" column="TOP_DEPT_NAME" />
+		<collection property="deptList" resultMap="deptListMap" />
+	</resultMap>
+	
+	<resultMap type="departmentVO" id="deptListMap">
+		<id property="deptId" column="DEPT_ID" />
+		<result property="deptName" column="DEPT_NAME" />
+		<collection property="employeeList" resultMap="employeeMap" />
+	</resultMap>
+	
+	<resultMap type="employeeVO" id="employeeMap">
+		<result property="empId" column="EMP_ID" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="empPosition" column="EMP_POSITION" />
+		<result property="cmmnGroupName" column="CMMN_GROUP_NAME" />
+		<result property="deptName" column="DEPT_NAME2" />
+	</resultMap>
+	<!-- 조직도를 위한 MAP(끝)-->
+		
+	<!-- 조직도(LIST) -->
+	<select id="getTreeList" resultMap="departmentMap">
+		SELECT A.DEPT_ID, 
+			   A.TOP_DEPT_ID, 
+			   A.DEPT_LEVEL, 
+			   A.DEPT_NAME, 
+			   A.EMP_ID,
+		       A.EMP_NAME, 
+		       C.DEPT_NAME AS TOP_DEPT_NAME, 
+		       A.EMP_POSITION, 
+		       F.CMMN_GROUP_NAME, 
+		       A.DEPT_NAME AS DEPT_NAME2
+		  FROM(
+		        SELECT D.DEPT_ID, D.TOP_DEPT_ID, D.DEPT_LEVEL, D.DEPT_NAME, E.EMP_ID,
+		               E.EMP_NAME, E.EMP_POSITION
+		          FROM( 
+			        	SELECT DEPT_ID, TOP_DEPT_ID, DEPT_LEVEL, DEPT_NAME
+			              FROM DEPARTMENT 
+			             START WITH TOP_DEPT_ID IS NULL
+			             CONNECT BY PRIOR DEPT_ID = TOP_DEPT_ID
+			             ORDER SIBLINGS BY DEPT_ID
+		               ) D INNER JOIN EMPLOYEE E ON(D.DEPT_ID = E.DEPT_ID)
+		          ORDER BY D.DEPT_ID, E.EMP_POSITION DESC
+		       ) A, DEPARTMENT C, COMMON_CODE F
+		 WHERE A.TOP_DEPT_ID = C.DEPT_ID 
+		   AND A.EMP_POSITION = F.CMMN_ID
+	</select>
+	
+	<!-- 문서양식(LIST) -->
+	<select id="getDocFormList" resultType="commonCodeVO">
+		SELECT CMMN_ID, CMMN_GROUP_ID, CMMN_GROUP_NAME, CMMN_NM1, CMMN_NM2, 
+			   CMMN_NM3, CMMN_OPT1, CMMN_OPT2, CMMN_OPT3, CMMN_YN, CMMN_CLOB
+		  FROM COMMON_CODE
+		 WHERE CMMN_GROUP_ID = 'A1'
+	</select>
+	
+	<!-- 보존연한(LIST) -->
+	<select id="getDocRetentionList" resultType="commonCodeVO">
+		SELECT CMMN_ID, CMMN_GROUP_ID, CMMN_GROUP_NAME, CMMN_NM1, CMMN_NM2, 
+			   CMMN_NM3, CMMN_OPT1, CMMN_OPT2, CMMN_OPT3, CMMN_YN, CMMN_CLOB 
+		  FROM COMMON_CODE
+		 WHERE CMMN_GROUP_ID = 'A4'
+	</select>
+	
+	<!-- 결재문서(ISNERT) -->
+	<insert id="insertAtrzDoc" parameterType="atrzDocVO">
+		<selectKey keyProperty="docId" resultType="String" order="BEFORE" >
+			SELECT 'ATDO' || LPAD(NVL(MAX(SUBSTR(DOC_ID,5,5)),0)+1,5,'0') FROM ATRZ_DOC
+		</selectKey>
+		INSERT INTO ATRZ_DOC(
+			DOC_ID, DOC_TITLE, DOC_CNTNT, DOC_STATE, ATRZ_LEVEL, 
+			DOC_TYPE_ID, DOC_MDFY_DT, DOC_WRT_DT, DOC_WRTR, ATRZ_LINE_STR, 
+			DOC_WRTR_NAME, DOC_RETENTION, DOC_DEPT_NAME, DOC_TYPE_NAME)
+		VALUES(
+			#{docId}, #{docTitle}, #{docCntnt}, #{docState}, 1, 
+			#{docTypeId}, NULL, SYSDATE, #{docWrtr}, #{atrzLineStr}, 
+			#{docWrtrName}, #{docRetention}, #{docDeptName}, #{docTypeName})
+	</insert>
+
+	<!-- 결재선(ISNERT) -->
+	<insert id="insertAtrzLine" parameterType="atrzLineVO">
+		<selectKey keyProperty="atrzLineId" resultType="String" order="BEFORE">
+			SELECT 'ATLN' || LPAD(NVL(MAX(SUBSTR(ATRZ_LINE_ID,5,5)),0)+1,5,'0') FROM ATRZ_LINE
+		</selectKey>
+		INSERT INTO ATRZ_LINE(
+			ATRZ_LINE_ID, ATRZ_LINE_NAME, ATRZ_LINE_DT, ATRZ_APRV_ID, ATRZ_LINE_STR)
+		VALUES(
+			#{atrzLineId}, #{atrzLineName}, SYSDATE, #{atrzAprvId},#{atrzLineStr})
+	</insert>
+	
+	<!-- 결재선상세(ISNERT) -->
+	<insert id="insertAtrzLineDetail" parameterType="atrzLineDetailVO">
+		INSERT INTO ATRZ_LINE_DETAIL(
+			ATRZ_LINE_ID, ATRZ_LINE_LEVEL, ATRZ_APRV_ID, ATRZ_NAME)
+		VALUES (
+			#{atrzLineId},#{atrzLineLevel},#{atrzAprvId},#{atrzName})
+	</insert>
+	
+	<!-- 임시문서(LIST) -->
+	<select id="getTempDocList" resultType="atrzDocVO" parameterType="string">
+		SELECT T.RNUM,
+		       T.DOC_ID, T.DOC_TITLE, T.DOC_STATE, T.ATRZ_LEVEL, T.DOC_TYPE_ID, 
+		       T.DOC_MDFY_DT, T.DOC_WRT_DT, T.DOC_WRTR, T.ATRZ_LINE_STR, T.DOC_WRTR_NAME, 
+		       T.DOC_RETENTION, T.DOC_DEPT_NAME, T.DOC_CNTNT, T.DOC_TYPE_NAME
+		FROM(
+		    SELECT ROW_NUMBER() OVER (ORDER BY DOC_WRTR DESC) AS RNUM,
+		           DOC_ID, DOC_TITLE, DOC_STATE, ATRZ_LEVEL, DOC_TYPE_ID, 
+		           DOC_MDFY_DT, DOC_WRT_DT, DOC_WRTR, ATRZ_LINE_STR, DOC_WRTR_NAME, 
+		           DOC_RETENTION, DOC_DEPT_NAME, DOC_CNTNT, DOC_TYPE_NAME
+		      FROM ATRZ_DOC
+		      WHERE DOC_WRTR LIKE #{docWrtr}
+		        AND DOC_STATE LIKE '임시저장'
+		) T 
+	</select>
+	
+	<!-- 임시문서(DETAIL) -->
+	<select id="getTempDoc" resultType="atrzDocVO" parameterType="string">
+		SELECT DOC_ID, DOC_TITLE, DOC_STATE, ATRZ_LEVEL, DOC_TYPE_ID, 
+		       DOC_MDFY_DT, DOC_WRT_DT, DOC_WRTR, ATRZ_LINE_STR, DOC_WRTR_NAME, 
+		       DOC_RETENTION, DOC_DEPT_NAME, DOC_CNTNT, DOC_TYPE_NAME 
+		  FROM ATRZ_DOC
+		 WHERE DOC_ID = #{docId}
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

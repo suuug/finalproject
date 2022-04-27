@@ -1,0 +1,151 @@
+package kr.or.workTogether.authorization.controller;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.workTogether.authorization.service.AuthorizationService;
+import kr.or.workTogether.common.vo.AtrzDocVO;
+import kr.or.workTogether.common.vo.CommonCodeVO;
+import kr.or.workTogether.common.vo.DepartmentVO;
+
+@RequestMapping("/autho")
+@Controller
+public class AuthorizationController {
+	private static final Logger logger = LoggerFactory.getLogger(AuthorizationController.class);
+
+	@Autowired
+	private AuthorizationService authoService;
+	
+	//전자결재 - 메인페이지(page)
+	@GetMapping("/main")
+	public String mainPage(Model model) {
+		return "autho/main";
+	}
+	
+	//전자결재 - 작성하기(page)
+	@GetMapping("/create")
+	public String createPage(Model model, @ModelAttribute AtrzDocVO atrzDocVO) {
+		//문서양식 리스트
+		List<CommonCodeVO> docFormList = authoService.getDocFormList();
+		Map<String, Object> docFormMap = new HashMap<String, Object>();
+		Map<String, Object> docContentMap = new HashMap<String, Object>();
+		
+		for(CommonCodeVO vo : docFormList) {
+			docFormMap.put(vo.getCmmnId(), vo.getCmmnGroupName());
+			docContentMap.put(vo.getCmmnId(), vo.getCmmnClob());
+			//System.err.println(vo);
+		}
+		model.addAttribute("docForm", docFormMap);
+		model.addAttribute("docContent",docContentMap);
+		
+		//보존연한 리스트
+		List<CommonCodeVO> docRetentionList = authoService.getDocRetentionList();
+		Map<String, Object> docRetentionMap = new HashMap<String, Object>();
+		for(CommonCodeVO vo : docRetentionList) {
+			docRetentionMap.put(vo.getCmmnId(), vo.getCmmnGroupName());
+		}
+		model.addAttribute("docRetention", docRetentionMap);
+		
+		//내용(폼 에디터)
+		String content = "<p>안녕</p>";
+		model.addAttribute("content", content);
+		
+		List<DepartmentVO> tList = authoService.getTreeList();
+		model.addAttribute("tList",tList);
+		logger.info("tList : "+tList);
+		
+		return "autho/create";
+	}
+	
+	//전자결재 - 작성하기
+	@PostMapping("/create")
+	public String create(Model model, @ModelAttribute AtrzDocVO atrzDocVO, @RequestParam String atrzAprv) throws IOException {
+//        response.setContentType("text/html; charset=utf-8");
+//        response.setCharacterEncoding("utf-8");
+//		PrintWriter out = response.getWriter();
+		atrzAprv = atrzAprv.replace(",,", ",");
+		atrzDocVO.setAtrzLineStr(atrzAprv);
+//		System.err.println(atrzDocVO.getDocTypeId()+"!!!!"+atrzDocVO.getDocRetention());
+//		if(atrzDocVO.getDocTypeId().equals("") || atrzDocVO.getDocRetention().equals("")) {
+//			System.err.println("이상한데");
+//			out.print("<script>alert('ㅇㅇ?'); location.href='/create/';</script>;");
+//			out.flush();
+//		}
+		
+		int result = authoService.insertAtrzDoc(atrzDocVO);
+		
+		return "redirect:/autho/create";
+	}
+	
+	@ResponseBody
+	@GetMapping("/treeList")
+	public List<DepartmentVO> treeListGet(Model model, @ModelAttribute DepartmentVO departVO){
+		
+		List<DepartmentVO> treeList = authoService.getTreeList();
+		model.addAttribute("treeList",treeList);
+		logger.info("treeList : "+treeList);
+		return treeList;
+		
+	}
+	@ResponseBody
+	@PostMapping("/treePost")
+	public List<DepartmentVO> treeListPost(Model model, @ModelAttribute DepartmentVO departVO,
+				@RequestBody Map<String, Object> map){
+		
+		List<DepartmentVO> treeList = authoService.getTreeList();
+		model.addAttribute("treeList",treeList);
+		logger.info("treeList : "+treeList);
+		return treeList;
+		
+	}
+	
+	
+	
+	//전자결재 - 임시문서(page)
+	@GetMapping("/tempDoc")
+	public String tempDoc(Model model) {
+		return "autho/tempDoc";
+	}
+	
+	//전자결재 - 받은 결재함(page)
+	@GetMapping("/receiveDoc")
+	public String receiveDoc(Model model) {
+		return "autho/receiveDoc";
+	}
+	
+	//전자결재 - 보낸 결재함(page)
+	@GetMapping("/sendDoc")
+	public String sendDoc(Model model) {
+		return "autho/sendDoc";
+	}
+	
+	//전자결재 - 전자결재 설정(page)
+	@GetMapping("/setting")
+	public String setting(Model model) {
+		return "autho/setting";
+	}
+	
+}
+
+
+
+
+
+
+
+

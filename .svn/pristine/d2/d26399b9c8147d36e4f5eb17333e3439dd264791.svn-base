@@ -1,0 +1,40 @@
+package kr.or.workTogether.schedule.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.workTogether.common.vo.CalendarVO;
+import kr.or.workTogether.common.vo.ScheduleVO;
+import kr.or.workTogether.schedule.service.ScheduleService;
+
+@RequestMapping("/schedule")
+@Controller
+public class ScheduleController {
+
+	@Autowired
+	ScheduleService scheduleService;
+	
+	//일정 보이기
+	@RequestMapping("/main")
+	public String main(Model model
+			, @ModelAttribute ScheduleVO scheduleVO){
+		
+		return "schedule/main";
+	}
+	
+	//일정 데이터 가져오기 ajax
+	@GetMapping("/caldata")
+	@ResponseBody
+	public List<CalendarVO> caldata(@RequestParam String schdlId){
+		List<CalendarVO>calendar = scheduleService.calendar(schdlId);
+		return calendar;
+	}
+}

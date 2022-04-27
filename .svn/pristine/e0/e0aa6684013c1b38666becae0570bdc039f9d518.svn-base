@@ -1,0 +1,240 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+
+<!-- Plugin css -->
+<link rel="stylesheet"
+	href="/resources/dist/assets/libs/@fullcalendar/core/main.min.css"
+	type="text/css">
+<link rel="stylesheet"
+	href="/resources/dist/assets/libs/@fullcalendar/daygrid/main.min.css"
+	type="text/css">
+<link rel="stylesheet"
+	href="/resources/dist/assets/libs/@fullcalendar/bootstrap/main.min.css"
+	type="text/css">
+<link rel="stylesheet"
+	href="/resources/dist/assets/libs/@fullcalendar/timegrid/main.min.css"
+	type="text/css">
+
+<script src="/resources/dist/assets/libs/pdfmake/build/pdfmake.min.js"></script>
+<script src="/resources/dist/assets/libs/pdfmake/build/vfs_fonts.js"></script>
+
+<style>
+.fc-event {
+	border: 0px;
+}
+</style>
+
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="card">
+			<div class="card-body">
+
+				<div
+					class="page-title-box d-flex align-items-center justify-content-between">
+					<h4 class="mb-0">
+						<a href="/schedule/main">전체 일정</a>
+					</h4>
+
+					<div class="page-title-right">
+						<ol class="breadcrumb m-0">
+							<li class="breadcrumb-item"><a href="/schedule/mySchedule">나의
+									일정</a></li>
+							<li class="breadcrumb-item"><a href="/schedule/comSchedule">회사
+									일정</a></li>
+						</ol>
+					</div>
+
+				</div>
+
+				<div class="row mb-4">
+					<div class="col-xl-3">
+						<div class="card h-100">
+							<div class="card-body">
+								<div>
+									<button type="button"
+										class="btn font-16 btn-primary waves-effect waves-light w-100"
+										id="btn-new-event" data-bs-toggle="modal"
+										data-bs-target="#event-modal">새 일정</button>
+								</div>
+								<p></p>
+								<div class="dt-buttons btn-group flex-wrap">
+									<button class="btn btn-secondary buttons-pdf buttons-html5 "
+										tabindex="0" aria-controls="datatable-buttons" type="button">
+										<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PDF로
+											출력하기&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+									</button>
+								</div>
+
+								<div id="external-events">
+									<br>
+									<p class="text-muted">드래그앤드롭 또는 일정표를 클릭하세요</p>
+									<div class="external-event fc-event bg-success"
+										data-class="bg-success">
+										<i></i>기본 일정
+									</div>
+									<div class="external-event fc-event bg-info"
+										data-class="bg-info">
+										<i></i>회의
+									</div>
+									<div class="external-event fc-event bg-warning"
+										data-class="bg-warning">
+										<i></i>경고
+									</div>
+									<div class="external-event fc-event bg-danger"
+										data-class="bg-danger">
+										<i></i>긴급
+									</div>
+
+								</div>
+
+
+							</div>
+						</div>
+					</div>
+					<!-- end col-->
+					<div class="col-xl-9">
+						<div class="card mb-0">
+							<div class="card-body">
+								<div id="calendar"></div>
+							</div>
+						</div>
+					</div>
+					<!-- end col -->
+				</div>
+				<!-- end row-->
+				<div style='clear: both'></div>
+
+				<!-- Add New Event MODAL -->
+				<div class="modal fade" id="event-modal" data-bs-backdrop="static"
+					data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header py-3 px-4">
+								<h5 class="modal-title" id="modal-title">일정 추가</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"
+									aria-label="Close"></button>
+							</div>
+
+							<div class="modal-body p-4">
+								<form class="needs-validation" name="event-form" id="form-event"
+									novalidate>
+									<div class="row">
+										<div class="col-12">
+											<div class="mb-3">
+												<label class="form-label">일정 이름</label> <input
+													class="form-control" placeholder="일정 이름을 입력하세요" type="text"
+													name="title" id="event-title" required value="">
+												<div class="invalid-feedback">일정 이름을 입력하세요</div>
+											</div>
+										</div>
+										<!-- end col-->
+										<div class="col-12">
+											<div class="mb-3">
+												<label class="form-label">분류</label> <select
+													class="form-select" name="category" id="event-category">
+													<option selected>--선택--</option>
+													<option value="bg-primary">일반</option>
+													<option value="bg-warning">경고</option>
+													<option value="bg-danger">긴급</option>
+													<option value="bg-success">완료</option>
+													<option value="bg-info">정보</option>
+													<option value="bg-dark">기타</option>
+												</select>
+												<div class="invalid-feedback">유효한 카테고리를 선택하세요</div>
+											</div>
+										</div>
+										<!-- end col-->
+									</div>
+									<!-- end row-->
+									<div class="row mt-2">
+										<div class="col-6">
+											<button type="button" class="btn btn-danger"
+												id="btn-delete-event">삭제</button>
+										</div>
+										<!-- end col-->
+										<div class="col-6 text-end">
+											<button type="button" class="btn btn-light me-1"
+												data-bs-dismiss="modal">닫기</button>
+											<button type="submit" class="btn btn-success"
+												id="btn-save-event">저장</button>
+										</div>
+										<!-- end col-->
+									</div>
+									<!-- end row-->
+								</form>
+							</div>
+						</div>
+						<!-- end modal-content-->
+					</div>
+					<!-- end modal dialog-->
+				</div>
+				<!-- end modal-->
+
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- plugin js -->
+<script src="/resources/dist/assets/libs/moment/min/moment.min.js"></script>
+<script
+	src="/resources/dist/assets/libs/jquery-ui-dist/jquery-ui.min.js"></script>
+<script src="/resources/dist/assets/libs/@fullcalendar/core/main.min.js"></script>
+<script
+	src="/resources/dist/assets/libs/@fullcalendar/bootstrap/main.min.js"></script>
+<script
+	src="/resources/dist/assets/libs/@fullcalendar/daygrid/main.min.js"></script>
+<script
+	src="/resources/dist/assets/libs/@fullcalendar/timegrid/main.min.js"></script>
+<script
+	src="/resources/dist/assets/libs/@fullcalendar/interaction/main.min.js"></script>
+
+<!-- Calendar init -->
+<!-- 	<script src="/resources/dist/assets/js/pages/calendar.init.js"></script>	 -->
+
+<script>
+	$(function() {
+
+		var request = $.ajax({
+			url : "/schedule/caldata",
+			data : {
+				'schdlId' : "${sessionScope.schdlId}"
+			},
+			method : "GET",
+			dataType : "json"
+		});
+
+		request
+				.done(function(data) {
+					console.log(data)
+
+					var calendarEl = document.getElementById('calendar');
+					var calendar = new FullCalendar.Calendar(
+							calendarEl,
+							{
+								plugins : [ "bootstrap", "interaction",
+										"dayGrid", "timeGrid" ],
+								editable : !0,
+								droppable : !0,
+								selectable : !0,
+								defaultView : "dayGridMonth",
+								themeSystem : "bootstrap",
+								header : {
+									left : "prev,next today",
+									center : "title",
+									right : "dayGridMonth,timeGridWeek,timeGridDay,listMonth"
+								},
+								eventLimit : true,
+								events : data
+
+							});//new FullCalendar end
+
+					calendar.render();
+
+				});
+	});
+</script>
+
+

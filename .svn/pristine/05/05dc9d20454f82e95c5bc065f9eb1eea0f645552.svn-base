@@ -1,0 +1,50 @@
+@charset "UTF-8";
+
+.rowPriority{
+	color: orange;
+	font-size: 1.2em;
+
+}
+.highPriority{
+	color: green;
+	font-size: 1.2em;
+}
+.offcanvas-body {
+	flex-grow: 0;
+}
+.offcanvas-end {
+    width: 550px;
+}
+.icon{
+	display: inline-block;
+	width: 20px;
+	text-align: center;
+}
+.membtn{
+	margin-right: 5px;
+	margin-top: 5px;
+}
+.app-search{
+	padding: 0px;
+}
+.dateLabel{
+	font-size: 0.8em;
+}
+.fa-calendar{
+	margin-top: 20px;
+}
+#rpl{
+	padding: 25px;
+	height: 100px;
+	background-color : #f3f3f3;
+	
+
+/* 	display: flex; */
+/*     min-height: 150px; */
+}
+.offcanvas {
+	border: 0px;
+}
+.workCntntDiv{
+	min-height: 150px;
+}

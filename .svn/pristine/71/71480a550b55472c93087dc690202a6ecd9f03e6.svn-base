@@ -1,0 +1,113 @@
+package kr.or.workTogether.common.vo;
+
+import java.util.Date;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+//메일(EMAIL)
+public class EmailVO {
+	private String emailId;                 //메일코드
+	private String emailCntnt;              //메일내용
+	private String emailTitle;              //메일제목
+	@DateTimeFormat(pattern="yyyy/MM/dd")
+	private Date emailWrtDt;                //메일작성일자
+	@DateTimeFormat(pattern="yyyy/MM/dd")
+	private Date emailDelDt;                //메일삭제일자
+	private String emailSendId;             //메일보낸직원
+	private String emailRcvId;              //메일받은직원
+	private String emailTypeId;             //메일유형코드
+	private String atchId;                  //첨부파일코드
+	private String emailSee;                //메일 열람 여부
+	
+	public EmailVO() {}
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
+
+	public String getEmailCntnt() {
+		return emailCntnt;
+	}
+
+	public void setEmailCntnt(String emailCntnt) {
+		this.emailCntnt = emailCntnt;
+	}
+
+	public String getEmailTitle() {
+		return emailTitle;
+	}
+
+	public void setEmailTitle(String emailTitle) {
+		this.emailTitle = emailTitle;
+	}
+
+	public Date getEmailWrtDt() {
+		return emailWrtDt;
+	}
+
+	public void setEmailWrtDt(Date emailWrtDt) {
+		this.emailWrtDt = emailWrtDt;
+	}
+
+	public Date getEmailDelDt() {
+		return emailDelDt;
+	}
+
+	public void setEmailDelDt(Date emailDelDt) {
+		this.emailDelDt = emailDelDt;
+	}
+
+	public String getEmailSendId() {
+		return emailSendId;
+	}
+
+	public void setEmailSendId(String emailSendId) {
+		this.emailSendId = emailSendId;
+	}
+
+	public String getEmailRcvId() {
+		return emailRcvId;
+	}
+
+	public void setEmailRcvId(String emailRcvId) {
+		this.emailRcvId = emailRcvId;
+	}
+
+	public String getEmailTypeId() {
+		return emailTypeId;
+	}
+
+	public void setEmailTypeId(String emailTypeId) {
+		this.emailTypeId = emailTypeId;
+	}
+
+	public String getAtchId() {
+		return atchId;
+	}
+
+	public void setAtchId(String atchId) {
+		this.atchId = atchId;
+	}
+
+	public String getEmailSee() {
+		return emailSee;
+	}
+
+	public void setEmailSee(String emailSee) {
+		this.emailSee = emailSee;
+	}
+
+	@Override
+	public String toString() {
+		return "EmailVO [emailId=" + emailId + ", emailCntnt=" + emailCntnt + ", emailTitle=" + emailTitle
+				+ ", emailWrtDt=" + emailWrtDt + ", emailDelDt=" + emailDelDt + ", emailSendId=" + emailSendId
+				+ ", emailRcvId=" + emailRcvId + ", emailTypeId=" + emailTypeId + ", atchId=" + atchId + ", emailSee="
+				+ emailSee + "]";
+	}
+	
+	
+}

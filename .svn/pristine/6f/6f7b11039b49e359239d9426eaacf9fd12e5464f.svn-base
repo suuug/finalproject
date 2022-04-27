@@ -1,0 +1,21 @@
+package kr.or.workTogether.authorization.service;
+
+import java.util.List;
+
+import kr.or.workTogether.common.vo.AtrzDocVO;
+import kr.or.workTogether.common.vo.CommonCodeVO;
+import kr.or.workTogether.common.vo.DepartmentVO;
+
+public interface AuthorizationService {
+	//문서양식 가져오기
+	public List<CommonCodeVO> getDocFormList();
+	
+	//보존연한(LIST)
+	public List<CommonCodeVO> getDocRetentionList();
+	
+	//결재문서(ISNERT)
+	public int insertAtrzDoc(AtrzDocVO atrzDocVO);
+	
+	//조직도 리스트
+	public List<DepartmentVO> getTreeList();
+}

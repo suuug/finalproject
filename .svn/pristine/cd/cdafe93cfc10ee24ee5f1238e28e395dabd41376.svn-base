@@ -1,0 +1,174 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<!DOCTYPE html>
+<style>
+
+</style>
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="card">
+			<div class="card-body">
+				<%@ include file="includeTab.jsp" %>
+			</div>
+		</div>
+	</div>
+</div>
+
+<c:forEach var="workVO"  items="${workList }" >	
+	<div class="col-md-6 col-xl-8">
+	    <div class="card">
+			<form:form modelAttribute="projWorkVO" action="/project/" method="POST" >
+		       	<div class="card-title row p-3">
+		       		<div class="col-10">
+		       			<sec:authentication property="principal.user" var="user"/>
+<%-- 		       			<form:hidden path="workRqstr" value="${user.username }"/> --%>
+<%-- 		       			<h3>${user.empName }</h3> --%>
+		       			<form:hidden path="workRqstr" value="${user.username }"/>
+		       			<h3>${workVO.workRqstr }</h3>
+		       		</div>
+		           	<div class="col-2">
+						<a href="#" id="editBtn" class="text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Edit" aria-label="Edit"><i id="wkUpdate" class="mdi mdi-pencil font-size-18"></i></a>
+						<a href="#" id="delBtn" class="text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Delete" aria-label="Delete"><i id="wkdelete" class="mdi mdi-trash-can font-size-18"></i></a>
+		           	</div>
+		       	</div> <!-- end card-title -->
+		       	<div class="card-body">
+		       			<form:hidden path="projId" value=""/>
+		       		<div class="p-3">
+			       		<form:hidden path="workTitle" class="form-control"  value="${workVO.workTitle }" />
+			       		<p>${workVO.workTitle }</p>
+					</div>
+					
+		       		<div class="p-3">
+						<form:hidden path="workCntnt" class="form-control"  value="${workVO.workCntnt }" />
+			       		<p>${workVO.workCntnt }</p>
+					</div>
+					
+					<div class="row p-3">
+						<div class="col-2">
+							<i class="fas fa-clock fa-2x "></i>
+						</div>
+						<div class="col-10">
+							<form:hidden path="workState" value="${workVO.workState }"/>				
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='요청' }">btn-info</c:if> btn-rounded waves-effect wkStateBtn" id="request">요청</button>						
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='진행' }">btn-success</c:if> btn-rounded waves-effect wkStateBtn" id="ing">진행</button>						
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='완료' }">btn-dark</c:if> btn-rounded waves-effect wkStateBtn" id="complete">완료</button>						
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='이슈' }">btn-danger</c:if> btn-rounded waves-effect wkStateBtn" id="issue">이슈</button>
+						</div>						
+					</div>
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-user-alt fa-2x "></i>
+							</div>
+							<div class="col-9 dropdown">
+								<div class="col-auto"> 	
+								  <button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropMember" data-bs-toggle="dropdown" aria-expanded="false">
+								    담당자
+								  </button>
+								<ul class="dropdown-menu" aria-labelledby="dropMember">
+								 	<c:forEach var="empVO" items="${memlist }">
+									<li><a class="dropdown-item projmem" href="" data-empId="${empVO.empName }">${empVO.empName }</a></li>
+									</c:forEach>
+								</ul>
+								</div>
+								<div id="memDiv" class="col-auto">
+									<c:forEach var="workMngrList" items="${workVO.workMngr }">
+										<button type='button' class='btn btn-outline-info waves-effect waves-light membtn'>
+											<i class='ri-close-line align-middle me-2'></i>
+											${workMngrList }
+										</button>
+						
+										<input id="workMngr" name="workMngr" value="${workMngrList }" type="hidden">
+									</c:forEach>
+								</div>
+							</div> 
+						</div>
+					</div> 
+						
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-calendar fa-2x "></i>
+							</div>
+							<div class="col-10">
+								<label for="workStrtDt" class="dateLabel">시작일자</label>
+								<input type="hidden" class="form-control" name="oldWorkStrtDt" type="date" />
+								<fmt:formatDate value="${workVO.workStrtDt }" pattern="yyyy-MM-dd" var="workStrtDt"/>					
+								<form:input class="form-control" path="workStrtDt" type="date" value="${workStrtDt } "/>
+							</div>
+						</div>
+					</div>
+						
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-calendar fa-2x "></i>
+							</div>
+							<div class="col-10">
+								<label for="workEndDt" class="dateLabel">마감일자</label>
+								<input type="hidden" class="form-control" name="oldWorkStrtDt" type="date" />						
+								<form:input class="form-control" path="workEndDt" type="date" value="${workVO.workEndDt }"/>						
+							</div>
+						</div>
+					</div>
+					
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-flag fa-2x "></i>
+							</div>
+							<div class="col-10 dropdown">
+								<form:hidden path="workPriority" value="${workVO.workPriority }"/>						
+								
+								
+								 <c:if test="${workVO.workPriority == null }">
+								 	<button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	업무순위
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '낮음' }">
+								 	<button class="btn btn-outline-warning waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<i class="fa fa-arrow-down icon"  style="color:orange"></i>낮음
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '보통' }">
+								 	<button class="btn btn-outline-dark waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<span class="icon">➖</span>보통
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '높음' }">
+								 	<button class="btn btn-outline-success waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<i class="fa fa-arrow-up icon"  style="color:green"></i>높음
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '긴급' }">
+								 	<button class="btn btn-outline-danger waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<span class="icon">🚨</span>긴급
+								 	</button>
+								 </c:if>
+								<ul class="dropdown-menu" aria-labelledby="dropPriority">
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "낮음" ><i class="fa fa-arrow-down icon"  style="color:orange"></i>낮음</a></li>
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "보통"><span class="icon">➖</span>보통</a></li>
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "높음" ><i class="fa fa-arrow-up icon"  style="color:green"></i>높음</a></li>
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "긴급" ><span class="icon">🚨</span>긴급</a></li>
+								</ul>
+							</div>    
+						</div>
+					</div>
+					<hr>
+		       	</div> <!-- end card-body -->
+				<sec:csrfInput/>
+			</form:form> <!-- end form:form -->
+		</div> <!-- end card -->
+	</div> <!-- end col -->
+<!--    <script >console.log("${workVO }")</script>       -->
+<!--    <script >console.log("${memlist }")</script>       -->
+</c:forEach>
+
+<script>
+
+</script>

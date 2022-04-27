@@ -1,0 +1,28 @@
+package kr.or.workTogether.common.vo;
+
+//메신저그룹(CHAT_MEMBER)
+public class ChatMemberVO {
+	private int chatId;                     //메신저방번호
+	private String empId;                   //직원아이디
+	
+	public ChatMemberVO() {}
+	
+	public int getChatId() {
+		return chatId;
+	}
+	public void setChatId(int chatId) {
+		this.chatId = chatId;
+	}
+	public String getEmpId() {
+		return empId;
+	}
+	public void setEmpId(String empId) {
+		this.empId = empId;
+	}
+
+	@Override
+	public String toString() {
+		return "ChatMemberVO [chatId=" + chatId + ", empId=" + empId + "]";
+	}
+	
+}

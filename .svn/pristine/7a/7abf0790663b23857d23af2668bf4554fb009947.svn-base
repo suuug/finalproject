@@ -1,0 +1,36 @@
+package kr.or.workTogether.notification.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.workTogether.common.vo.NotificationVO;
+import kr.or.workTogether.notification.mapper.NotificationMapper;
+import kr.or.workTogether.notification.service.NotificationService;
+
+@Service
+public class NotificationServiceImpl implements NotificationService{
+
+	@Autowired
+	private NotificationMapper notiMapper;
+	
+	@Override
+	public NotificationVO getNoti(String notReceiver) {
+		return notiMapper.getNoti(notReceiver);
+	}
+
+	@Override
+	public int getCountNoti(NotificationVO notiVO) {
+		return notiMapper.getCountNoti(notiVO);
+	}
+
+	@Override
+	public int insertNoti(NotificationVO notiVO) {
+		return notiMapper.insertNoti(notiVO);
+	}
+
+	@Override
+	public int updateNoti(String notReceiver) {
+		return notiMapper.updateNoti(notReceiver);
+	}
+
+}

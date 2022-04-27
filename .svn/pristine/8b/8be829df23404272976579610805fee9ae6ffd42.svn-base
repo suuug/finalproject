@@ -1,0 +1,24 @@
+package kr.or.workTogether.attendance.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.workTogether.common.vo.AtndnAplictVO;
+import kr.or.workTogether.common.vo.AtndnDlyVO;
+
+@Mapper
+public interface AttendanceMapper {
+
+	//근태현황
+	public List<AtndnDlyVO> state();
+	
+	//근태신청
+	public List<AtndnAplictVO> apply();
+	
+	// 근태현황
+	public List<AtndnDlyVO> stateMem();
+	
+	// 근태신청
+	public List<AtndnAplictVO> applyMem();
+}

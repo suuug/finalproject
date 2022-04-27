@@ -1,0 +1,821 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"  pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<style>
+.rowPriority{
+	color: orange;
+	font-size: 1.2em;
+
+}
+.highPriority{
+	color: green;
+	font-size: 1.2em;
+}
+
+.offcanvas-end {
+    width: 550px;
+}
+.icon{
+	display: inline-block;
+	width: 20px;
+	text-align: center;
+}
+.membtn{
+	margin-right: 5px;
+	margin-top: 5px;
+}
+.app-search{
+	padding: 0px;
+}
+.dateLabel{
+	font-size: 0.8em;
+}
+.fa-clock{
+	margin-top: 20px;
+}
+
+</style>
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="card">
+			<div class="card-body">
+			
+				<%@ include file="includeTab.jsp" %>
+					                      
+               	<div class="row">
+               	
+					<div class="col-lg-2">
+						<%@ include file="includeSide.jsp" %>	
+					</div> <!-- col end -->
+					
+					<div class="col-lg-9 ">
+						<div class="row">
+<!-- 							<div class="col-2 alert alert-primary" role="alert"> -->
+<!-- 								  최소 한 개  -->
+<!-- 							</div> -->
+							<div class="col-4">
+                                <form class="app-search d-none d-lg-block">
+		                            <div class="position-relative">
+		                                <input type="text" class="form-control" placeholder="Search...">
+		                                <span class="ri-search-line"></span>
+		                            </div>
+                        		</form>
+                            </div>	
+							<div class="col-6">
+								<button type="button" id="insertWorkBtn" class="btn btn-dark btn-rounded waves-effect waves-light">
+									업무추가
+								</button>
+							</div>
+						</div><!-- row end -->
+						
+						<div class="row">
+							<div class="table">
+	                            <table id="selection-datatable" class="table dt-responsive nowrap w-100">
+	                                <thead>
+	                                    <tr>
+	                                        <th>번호</th>
+	                                        <th>상태</th>
+	                                        <th>우선순위</th>
+	                                        <th>업무내용</th>
+	                                        <th>담당자</th>
+	                                        <th>수정일시</th>
+	                                    </tr>
+	                                </thead>
+	                                <tbody id="tbody">
+									
+	                                  	
+	                            
+	                                </tbody>
+	                            </table>
+	                        
+	                        </div> <!-- end table-->
+							
+						</div><!-- row end -->
+						
+					</div> <!-- col end -->
+					
+            	</div><!-- end row-->
+			</div> <!-- end card body-->
+		</div> <!-- end card -->
+	</div>
+</div>
+		
+<!-- 	<div class="alert alert-primary alert-dismissible fade" role="alert"> -->
+<!-- 		<font style="vertical-align: inherit;"> -->
+<!-- 			<font style="vertical-align: inherit;"> -->
+<!--         	최소 한 개 이상 체크하세요! -->
+<!--         	</font> -->
+<!--         </font> -->
+<!--         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="닫기"> -->
+<!--         </button> -->
+<!--     </div> -->
+	
+
+	
+	<!-- Modal -->
+	<div class="modal" id="insertWorkModal" tabindex="-1">
+		<div class="modal-dialog" >
+			<div class="modal-content">
+				<form:form modelAttribute="projWorkVO" method="POST" action="/project/insertWork" enctype="multipart/form-data">
+					<div class="modal-header">
+						<h5 class="modal-title">업무추가</h5>
+						
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+							<form:hidden path="projId" value="${projWorkVO.projId }"/>						
+							<form:hidden path="workRqstr" value="EMPL00004"/>		
+<%-- 							<sec:authentication property="principal.username"/>				 --%>
+						<div class="row p-3">
+							<form:input class="form-control form-control-lg" path="workTitle" placeholder="제목을 입력하세요" />						
+						</div>
+						<div class="p-3">
+							<form:hidden path="workState" />						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn">요청</button>						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn">진행</button>						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn">완료</button>						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn">이슈</button>						
+						</div>
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-user-alt fa-2x "></i>
+								</div>
+								<div class="col-9 dropdown">
+									<div class="col-auto"> 	
+									
+									  <button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropMember" data-bs-toggle="dropdown" aria-expanded="false">
+									    담당자
+									  </button>
+									<ul class="dropdown-menu" aria-labelledby="dropMember">
+									 	<c:forEach var="empVO" items="${list }">
+										<li><a class="dropdown-item projmem" href="#" empId="${empVO.empId }">${empVO.empName }</a></li>
+										</c:forEach>
+									</ul>
+									</div>
+									<div id="memDiv" class="col-auto"> </div>
+								</div> 
+							</div>
+						</div> 
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-clock fa-2x "></i>
+								</div>
+								<div class="col-10">
+									<label for="workStrtDt" class="dateLabel">시작일자</label>
+									<form:input class="form-control" path="workStrtDt" type="date" />						
+								
+								</div>
+							</div>
+						</div>
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-clock fa-2x "></i>
+								</div>
+								<div class="col-10">
+									<label for="workEndDt" class="dateLabel">마감일자</label>
+									<form:input class="form-control" path="workEndDt" type="date" />						
+								</div>
+							</div>
+						</div>
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-flag fa-2x "></i>
+								</div>
+								<div class="col-10 dropdown">
+									<form:hidden path="workPriority" />						
+									<button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+									    업무순위
+									 </button>
+									<ul class="dropdown-menu" aria-labelledby="dropPriority">
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "낮음" ><i class="fa fa-arrow-down icon"  style="color:orange"></i>낮음</a></li>
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "보통"><span class="icon">➖</span>보통</a></li>
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "높음" ><i class="fa fa-arrow-up icon"  style="color:green"></i>높음</a></li>
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "긴급" ><span class="icon">🚨</span>긴급</a></li>
+									</ul>
+								</div>    
+							
+							</div>
+						</div>
+						
+						<div class="p-3">
+							<form:textarea path="workCntnt" class="form-control"  rows="5" placeholder="내용을 입력하세요" />
+						</div>
+						
+						<div class="p-3">
+							<input type="file" class="form-control" name="uploadFile" multiple />
+						</div>
+						
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button type="submit" id="okBtn" class="btn btn-primary">확인</button>
+					</div>
+					<sec:csrfInput/>
+				</form:form>	
+			</div>
+		</div>
+	</div>
+	
+
+     <!-- right offcanvas -->
+     <div class="offcanvas offcanvas-end" tabindex="-1" id="wokrDetail" aria-labelledby="wokrDetailLabel">
+         <div class="offcanvas-header">
+           <h5 id="wokrDetailLabel">업무제목</h5>
+           <div class="col-2">
+           <a href="#" id="editBtn" class="text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-pencil font-size-18"></i></a>
+           <a href="#" id="delBtn" class="text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete"><i class="mdi mdi-trash-can font-size-18"></i></a>
+           
+           <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+           </div>
+         </div>
+         <div class="offcanvas-body">
+           		<form:form modelAttribute="projWorkVO" method="POST" action="/project/">
+							<form:hidden path="projId" value="${projWorkVO.projId }"/>						
+							<form:hidden path="workRqstr" value="EMPL00004"/>		
+<!-- 					<div class="p-3"> -->
+<%-- 						<form:input path="workCntnt" class="form-control"  rows="5" placeholder="내용을 입력하세요" />  --%>
+<!-- 					</div> -->
+					<div class="p-3">
+						<form:textarea path="workCntnt" class="form-control"  rows="5" placeholder="" />
+					</div>
+						<div class="p-3">
+							<form:hidden path="workState" />					
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn" id="request">요청</button>						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn" id="ing">진행</button>						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn" id="complete">완료</button>						
+							<button type="button" class="btn btn-secondary btn-rounded waves-effect wkStateBtn" id="issue">이슈</button>						
+						</div>
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-user-alt fa-2x "></i>
+								</div>
+								<div class="col-9 dropdown">
+									<div class="col-auto"> 	
+									
+									  <button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropMember" data-bs-toggle="dropdown" aria-expanded="false">
+									    담당자
+									  </button>
+									<ul class="dropdown-menu" aria-labelledby="dropMember">
+									 	<c:forEach var="empVO" items="${list }">
+										<li><a class="dropdown-item projmem" href="#" empId="${empVO.empId }">${empVO.empName }</a></li>
+										</c:forEach>
+									</ul>
+									</div>
+									<div id="memDiv" class="col-auto"> </div>
+								</div> 
+							</div>
+						</div> 
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-clock fa-2x "></i>
+								</div>
+								<div class="col-10">
+									<label for="workStrtDt" class="dateLabel">시작일자</label>
+									<input type="hidden" class="form-control" name="oldWorkStrtDt" type="date" />						
+									<form:input class="form-control" path="workStrtDt" type="date" />
+								</div>
+							</div>
+						</div>
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-clock fa-2x "></i>
+								</div>
+								<div class="col-10">
+									<label for="workEndDt" class="dateLabel">마감일자</label>
+									<input type="hidden" class="form-control" name="oldWorkStrtDt" type="date" />						
+									<form:input class="form-control" path="workEndDt" type="date" />						
+								</div>
+							</div>
+						</div>
+						
+						<div class="p-3">
+							<div class="row">
+								<div class="col-2">
+									<i class="fas fa-flag fa-2x "></i>
+								</div>
+								<div class="col-10 dropdown">
+									<form:hidden path="workPriority" />						
+									<button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+									    업무순위
+									 </button>
+									<ul class="dropdown-menu" aria-labelledby="dropPriority">
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "낮음" ><i class="fa fa-arrow-down icon"  style="color:orange"></i>낮음</a></li>
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "보통"><span class="icon">➖</span>보통</a></li>
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "높음" ><i class="fa fa-arrow-up icon"  style="color:green"></i>높음</a></li>
+										<li><a class="dropdown-item priorityBtn" href="#" priority = "긴급" ><span class="icon">🚨</span>긴급</a></li>
+									</ul>
+								</div>    
+							
+							</div>
+						</div>
+					
+<!-- 					<div class="modal-footer"> -->
+<!-- 						<button type="button" class="btn btn-secondary" -->
+<!-- 							data-bs-dismiss="modal">취소</button> -->
+<!-- 						<button type="submit" id="okBtn" class="btn btn-primary">확인</button> -->
+<!-- 					</div> -->
+					<sec:csrfInput/>
+				</form:form>
+         </div>
+     </div>
+	
+<script type="text/javascript">
+// function datailCilck(){
+// 	console.log();
+// }
+
+function toStringByFormat(date) { 
+	var year = date.getFullYear();
+	var month = ('0' + (date.getMonth() + 1)).slice(-2);
+	var day = ('0' + date.getDate()).slice(-2);
+
+	var dateString = year + '-' + month  + '-' + day;
+	
+	return dateString;
+}
+	
+function removeClass(p_obj, p_list){
+// 	console.log(p_obj);
+	for(var i=0; i<p_list.length; i++){
+		$(p_obj).removeClass(p_list[i]);
+// 		console.log(p_list[i]);
+	}
+}	
+
+function wkStateBtnClick(p_btn){
+	var wkState = $(p_btn).text();
+	var removeList = ["btn-info", "btn-success", "btn-dark", "btn-danger"];
+	removeClass(".wkStateBtn", removeList);
+
+	$(".wkStateBtn").addClass("btn-secondary"); 
+	
+	if(wkState=="요청"){
+	$(p_btn).addClass("btn-info");
+	}
+	if(wkState=="진행"){
+	$(p_btn).addClass("btn-success");
+	}
+	if(wkState=="완료"){
+	$(p_btn).addClass("btn-dark");
+	}
+	if(wkState=="이슈"){
+	$(p_btn).addClass("btn-danger");
+	}
+	
+	$("#workState").val(wkState);
+}
+
+function priorityBtnClick(p_btn){
+	var priority = $(p_btn).attr("priority")
+	
+	var priorityBtn = $(p_btn).parents('.dropdown').find("#dropPriority");
+	
+	
+	var removeList = ["btn-outline-secondary", "btn-outline-warning", "btn-outline-dark", "btn-outline-success", "btn-outline-danger"];
+	removeClass(priorityBtn, removeList)
+
+	
+	var code = "";
+	if(priority=="낮음"){
+		code += '<i class="fa fa-arrow-down icon" style="color:orange"></i>낮음'; 	
+		priorityBtn.html(code);
+		priorityBtn.addClass("btn-outline-warning"); 
+	}
+	if(priority=="보통"){
+		priorityBtn.text($(p_btn).text());
+		priorityBtn.addClass("btn-outline-dark"); 
+		
+	}
+	if(priority=="높음"){
+			
+		code += '<i class="fa fa-arrow-down icon" style="color:green"></i>높음'; 	
+		priorityBtn.html(code);
+		
+		priorityBtn.addClass("btn-outline-success"); 
+		
+	}
+	if(priority=="긴급"){
+		priorityBtn.text($(p_btn).text());
+		priorityBtn.addClass("btn-outline-danger"); 
+			
+	}
+	
+	$(this).parents('.dropdown').find('input[name=workPriority]').val(priority);
+
+// 	$("input[name='workPriority']").val(priority);
+}
+$(function(){
+	// var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+	// var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+	//   return new bootstrap.Tooltip(tooltipTriggerEl)
+	// })
+// 	$('[data-toggle="tooltip"]').tooltip();   
+
+	// ajax Post 사용시 같이 보낼 토큰헤더 
+	var token = '${_csrf.token}'
+	var header = '${_csrf.headerName}'
+	
+	// 리스트 가져오기
+	workList();
+	 
+	// 업무추가 버튼 클릭시 모달 보여짐
+	$("#insertWorkBtn").on("click", function(){
+		$("#insertWorkModal").modal("show");
+		
+		$("#memDiv").empty();
+	})
+	
+	// ------------모달안에서 이벤트---------------
+	// 담당자 클릭시 해당 담당자 추가됨 
+	$(".projmem").on("click", function(){
+		var memlist = [];
+		memlist = $(".membtn");
+		
+		// 중복이름 선택시 리턴
+		for(var i=0; i<memlist.length; i++){
+			if($(this).text()==memlist[i].innerText){
+				return false;
+			}
+		}
+		
+		// 이름들어간 버튼 만들기
+		var btn = "<button type='button' class='btn btn-outline-info waves-effect waves-light membtn'>";
+		btn += "<i class='ri-close-line align-middle me-2'></i>";
+		btn += $(this).text();
+		btn += "</button>";
+		// 선택한 이름 VO에 들어갈 수 있게 히든으로 넣어놓기
+		btn += '<input id="workMngr" name="workMngr" value="'+$(this).attr("empId")+'" type="hidden">';
+		
+		$("#memDiv").append(btn);
+		
+	})
+	
+	// 추가된 담당자버튼에 있는 x클릭시 담당자 삭제됨
+	$(document).on("click","#insertWorkModal .ri-close-line", function(){
+// 		console.log($(this).parents(".btn"));
+		$(this).parents(".btn").remove();
+	})
+	
+	// 업무우선도 클릭시 
+	$("#insertWorkModal .priorityBtn").on("click", function(){
+// 		console.log($(this).attr("priority"));
+		priorityBtnClick(this);
+// 		$(this).parents('.dropdown').find('input[name=workPriority]').val(priority);
+		
+	})
+	
+	// 업무상태 버튼 클릭시 
+	$("#insertWorkModal .wkStateBtn").on("click", function(){
+		wkStateBtnClick(this);
+
+	})
+	// ------------모달안에서 이벤트 끝---------------
+// 	console.log(priorityList);
+// 	console.log(wkStateList);
+	
+	// 사이드탭 클릭시 
+	$(".sideBox").on("click", function(){
+		workList();
+		
+	})
+	
+	// ------------디테일 클릭시 이벤트---------------
+	$(document).on("click",".wkDetail", function(){
+		console.log("wkDetail test");
+		var workId = $(this).children(".workId").text();
+		console.log(workId);
+		
+		
+		$.ajax({
+			url: "/project/workDetail",
+			type: "POST",
+			dataType: "json",
+			data: {
+				'workId' : workId		
+			},
+			success: function(res) {
+				console.log(res);
+				// 제목
+				$("#wokrDetailLabel").text(res.workTitle);			
+				// 내용
+				$("#wokrDetail #workCntnt").text(res.workCntnt);
+				// 상태
+				var removeList = ["btn-info", "btn-success", "btn-dark", "btn-danger"];
+				removeClass(".wkStateBtn", removeList);
+				
+				if(res.workState=="요청"){
+					$("#wokrDetail #request").addClass("btn-info");
+				}
+				if(res.workState=="진행"){
+					$("#wokrDetail #ing").addClass("btn-success");
+				}
+				if(res.workState=="완료"){
+					$("#wokrDetail #complete").addClass("btn-dark");
+				}
+				if(res.workState=="이슈"){
+					$("#wokrDetail #issue").addClass("btn-danger");
+				}
+				
+// 				wkStateBtnClick($("#workDetail "))
+				
+				
+				// 담당자
+				$("#wokrDetail #memDiv").empty()
+				for(var i=0; i<res.workMngr.length; i++){
+					
+					// 이름들어간 버튼 만들기
+					var btn = "<button type='button' class='btn btn-outline-info waves-effect waves-light membtn'>";
+					btn += "<i class='ri-close-line align-middle me-2'></i>";
+					btn += res.workMngr[i];
+					btn += "</button>";
+					// 선택한 이름 VO에 들어갈 수 있게 히든으로 넣어놓기
+					btn += '<input id="workMngr" name="workMngr" value="'+ res.workMngr[i] +'" type="hidden">';
+					
+					$("#wokrDetail #memDiv").append(btn);
+				}
+				
+				// 날짜
+				var workStrtDt = toStringByFormat(new Date(res.workStrtDt))
+				var workEndDt = toStringByFormat(new Date(res.workEndDt))
+				$("#wokrDetail input[name=oldWorkStrtDt]").val(workStrtDt);
+				$("#wokrDetail #workStrtDt").val(workStrtDt);
+				$("#wokrDetail #workEndDt").val(workEndDt);
+				
+				// 업무순위
+				var removeList = ["btn-outline-secondary", "btn-outline-warning", "btn-outline-dark", "btn-outline-success", "btn-outline-danger"];
+				removeClass("#wokrDetail #dropPriority", removeList)
+				
+				code = "";
+				if(res.workPriority=="낮음"){
+					code += '<i class="fa fa-arrow-down icon" style="color:orange"></i>낮음'; 
+					$("#wokrDetail #dropPriority").addClass("btn-outline-warning"); 
+				}
+				if(res.workPriority=="보통"){
+					code += '<span class="icon">➖</span>보통'; 	
+					$("#wokrDetail #dropPriority").addClass("btn-outline-dark"); 
+					
+				}
+				if(res.workPriority=="높음"){
+						
+					code += '<i class="fa fa-arrow-down icon" style="color:green"></i>높음'; 	
+					$("#wokrDetail #dropPriority").addClass("btn-outline-success"); 
+					
+				}
+				if(res.workPriority=="긴급"){
+					code += '<span class="icon">🚨</span>긴급'; 	
+					$("#wokrDetail #dropPriority").addClass("btn-outline-danger"); 
+						
+				}
+					$("#wokrDetail #dropPriority").html(code);
+				
+				
+						
+			},
+			beforeSend:function(xhr) { 
+				xhr.setRequestHeader(header, token)
+			},
+			error: function(xhr) {
+				alert(xhr.status)
+			
+			}
+		})
+		
+	})
+	
+	// ------------디테일 클릭시 이벤트 끝---------------
+	
+	// ------------디테일 창 안에 데이터 클릭시 이벤트 ----------
+	// 상태버튼 클릭시
+	$("#wokrDetail .wkStateBtn").on("click", function(){
+		Swal.fire(
+				{ title: '상태를 변경하시겠습니까?'
+// 						, text: "다시 되돌릴 수 없습니다. 신중하세요."
+						, icon: 'warning', showCancelButton: true
+						, confirmButtonColor: '#3085d6'
+						, cancelButtonColor: '#d33'
+						, confirmButtonText: '확인'
+						, cancelButtonText: '취소' 
+				}).then((result) => { 
+						if (result.isConfirmed) { 
+							Swal.fire( '', '상태가 변경되었습니다.', 'success' ) 
+							wkStateBtnClick(this);
+						} 
+				})
+        	
+	})	
+	
+	// 담당자 X클릭시
+	$(document).on("click", "#wokrDetail .ri-close-line", function(){
+		Swal.fire(
+				{ title: '담당자를 삭제하시겠습니까?'
+// 						, text: "다시 되돌릴 수 없습니다. 신중하세요."
+						, icon: 'warning', showCancelButton: true
+						, confirmButtonColor: '#3085d6'
+						, cancelButtonColor: '#d33'
+						, confirmButtonText: '확인'
+						, cancelButtonText: '취소' 
+				}).then((result) => { 
+						if (result.isConfirmed) { 
+							$(this).parents(".btn").remove();
+						} 
+				})
+        	
+	})	
+	// 날짜버튼 클릭시
+	$("#wokrDetail #workStrtDt").on('focusin', function(){
+	    console.log("Saving value " + $(this).val());
+	    $(this).data('old', $(this).val());
+	});
+	
+	$("#wokrDetail #workStrtDt").on("change", function(){
+// 		alert($("#wokrDetail input[name=oldWorkStrtDt]").val());
+		oldvalue =  $(this).data('old');
+		Swal.fire(
+				{ title: '상태를 변경하시겠습니까?'
+// 						, text: "다시 되돌릴 수 없습니다. 신중하세요."
+						, icon: 'warning', showCancelButton: true
+						, confirmButtonColor: '#3085d6'
+						, cancelButtonColor: '#d33'
+						, confirmButtonText: '확인'
+						, cancelButtonText: '취소' 
+				}).then((result) => { 
+						if (!result.isConfirmed) { 
+// 							Swal.fire( '', '상태가 변경되었습니다.', 'success' ) 
+							$(this).val(oldvalue);
+						} 
+				})
+        	
+	})
+	
+	// 업무우선도 클릭시 
+	$("#wokrDetail .priorityBtn").on("click", function(){
+		Swal.fire(
+				{ title: '업무 우선도를 바꾸시겠습니까?'
+// 						, text: "다시 되돌릴 수 없습니다. 신중하세요."
+						, icon: 'warning', showCancelButton: true
+						, confirmButtonColor: '#3085d6'
+						, cancelButtonColor: '#d33'
+						, confirmButtonText: '확인'
+						, cancelButtonText: '취소' 
+				}).then((result) => { 
+						if (result.isConfirmed) { 
+							priorityBtnClick(this);
+						} 
+				})
+		
+	})
+	
+	// 수정버튼 클릭시 
+	$("#wokrDetail #editBtn").on("click", function(){
+		
+		
+	})
+	
+	// ------------디테일 창 안에 데이터 클릭시 이벤트 끝----------
+
+	
+	function workList(){
+		
+//		console.log($(this).val());
+//		division = $(this).val();`
+		var division = $("input[name='division']:checked").val();
+//	 	console.log(division);
+		
+		var wkStateObj = $("input[name='wkState']:checked");
+//	 	console.log(wkStateObj);
+		
+		var priorityObj = $("input[name='priority']:checked");
+//	 	console.log(priorityObj);
+
+		if(wkStateObj.length < 1 || priorityObj.length < 1){
+			alert("최소 한 개 이상 선택하세요!")
+			event.preventDefault()
+			return false;
+		}
+		
+		var wkStateList = []; 
+		for(var i=0; i<wkStateObj.length; i++){
+//	 		console.log(wkStateObj[i].value);
+			wkStateList.push(wkStateObj[i].value)
+		}
+		
+		var priorityList= []; 
+		for(var i=0; i<priorityObj.length; i++){
+//	 		console.log(wkStateObj[i].value);
+			priorityList.push(priorityObj[i].value)
+		}
+		
+		$.ajax({
+			url: "/project/select",
+			type: "POST",
+			contentType : "application/json; charset=utf-8",
+			data: JSON.stringify({'empId' : "EMPL00004"
+				,'projId' : "${projWorkVO.projId}"
+				,'division' : division
+				,'wkStateList' : wkStateList
+				,'priorityList' : priorityList
+			}),
+			success: function(res) {
+//					console.log(res);
+
+				var tbody = "";
+				$.each(res, function(i, v) {
+					
+//						var workId = "'" + v.workId + "'";
+					tbody += '<tr class="wkDetail" data-bs-toggle="offcanvas" data-bs-target="#wokrDetail" aria-controls="wokrDetail" >';
+					tbody += '<td class="workId" >'+v.workId+'</td>';
+					tbody += '<td>';
+					if(v.workState==null){
+						tbody += '-';
+					}
+					if(v.workState=="요청"){
+						tbody += '<button type="button" class="btn btn-sm btn-info btn-rounded waves-effect ">'+v.workState +'</button>';
+					}
+					if(v.workState=="진행"){
+						tbody += '<button type="button" class="btn btn-sm btn-success btn-rounded waves-effect ">'+v.workState +'</button>';
+					}
+					if(v.workState=="완료"){
+						tbody += '<button type="button" class="btn btn-sm btn-dark btn-rounded waves-effect ">'+v.workState +'</button>';
+					}
+					if(v.workState=="이슈"){
+						tbody += '<button type="button" class="btn btn-sm btn-danger btn-rounded waves-effect ">'+v.workState +'</button>';
+					}
+					tbody += '</td>';
+					
+					// 순위
+					if(v.workPriority==null){
+						tbody += '<td>-</td>';
+					}else{
+		                tbody += '<td>';
+						
+						if(v.workPriority=="낮음"){
+							tbody += '<i class="fa fa-arrow-down icon" style="color:orange"></i>낮음'; 	
+						}
+						if(v.workPriority=="보통"){
+							tbody += '<span class="icon">➖</span>보통'; 	
+							
+						}
+						if(v.workPriority=="높음"){
+							tbody += '<i class="fa fa-arrow-down icon" style="color:green"></i>높음'; 	
+							
+						}
+						if(v.workPriority=="긴급"){
+							tbody += '<span class="icon">🚨</span>긴급'; 	
+								
+						}
+		                tbody += '</td>';
+					}   
+					
+	                tbody += '<td>'+v.workTitle +'</td>';
+
+	                if(v.workMngr.length == 1){
+		                tbody += '<td><a href="javascript:void(0);" class="text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">' + v.workMngr[0] + '</a></td>';
+	                }else if(v.workMngr.length > 1){
+		                tbody += '<td data-toggle="tooltip" data-placement="top" title="Tooltip on top">' + v.workMngr[0] + '외 '+ (v.workMngr.length-1) +'명 </td>';
+	                }else{
+	                	tbody += '<td> - </td>';
+	                	
+	                }
+	                
+	                tbody += '<td>'+ toStringByFormat(new Date(v.workMdfyDt)) +'</td>';
+	                tbody += '</tr>';
+	                
+	            
+				})
+				
+				$("#tbody").html(tbody);
+				
+			},
+			error: function(xhr) {
+				alert(xhr.status)
+
+			},
+			beforeSend:function(xhr) { 
+				xhr.setRequestHeader(header, token)
+			},
+			dataType: "json"
+		})
+	}	
+	
+	
+})
+</script>

@@ -1,0 +1,162 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>프로젝트메인</title>
+
+</head>
+<body>
+
+	<div class="card">
+		<div class="card-body">
+			<div class="row">
+				<div class="col-lg-8">
+					<h2>진행중인 프로젝트 목록</h2>
+				</div>
+				<div class="col-lg-4">
+					<!-- Button trigger modal -->
+					<button type="button" id="insertBtn" class="btn btn-primary"
+						data-toggle="modal" data-target="#insertModal">새프로젝트</button>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="card">
+						<div class="row card-body">
+							<c:forEach var="projVO" items="${list }">
+								<a href="/project/home?projId=${projVO.projId }">
+									<div class="col detail">
+										<p>${projVO.projName}</p>
+										<p>${projVO.projCntnt  }</p>
+										<fmt:formatDate value="${projVO.projStrtDt  }" type="date" />
+										~ <br />
+										<fmt:formatDate value="${projVO.projEndDt  }" type="date" />
+										<br />
+										<%-- <fmt:formatDate value="${projVO.projStrtDt  }" pattern="yyyy-MM-DD" />~<br /> --%>
+										<%-- <fmt:formatDate value="${projVO.projEndDt  }" pattern="yyyy-MM-DD" /><br /> --%>
+									</div>
+								</a>
+							</c:forEach>
+						</div>
+					</div>
+				</div>
+			</div><!-- row end -->
+			
+			<div class="row">
+				<div class="col-4">
+	            	<h4 class="card-title">요청받은 업무 목록</h4>
+            	</div>
+				<div class="col-4">
+	            	<h4 class="card-title">요청한 업무 목록</h4>
+            	</div>
+				<div class="col-4">
+	            	<h4 class="card-title">이슈 목록</h4>
+            	</div>
+				
+			</div><!-- row end -->
+			
+			<div class="row">
+				<div class="card col-4">
+	                <div class="card-body">
+	                    <c:forEach var="workVO" items="${giveWorkList }">
+							<div class="card-text">
+								<p>${workVO.workTitle}</p>
+							</div>
+						</c:forEach>
+	                </div>
+            	</div>
+				<div class="card col-4">
+	                <div class="card-body">
+	                    <c:forEach var="workVO" items="${getWorkList }">
+							<div class="card-text">
+								<p>${workVO.workTitle}</p>
+							</div>
+						</c:forEach>
+	                </div>
+            	</div>
+				<div class="card col-4">
+	                <div class="card-body">
+	                    <c:forEach var="workVO" items="${issueWorkList }">
+							<div class="card-text">
+								<p>${workVO.workTitle}</p>
+							</div>
+						</c:forEach>
+	                </div>
+            	</div>
+			</div><!-- row end -->
+			
+		</div>
+	</div>
+
+
+	<!--insert Modal -->
+	<div class="modal" id="insertModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form:form modelAttribute="projectVO" method="post"
+					action="/project/insert">
+					<div class="modal-header">
+						<h5 class="modal-title">새프로젝트</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row mb-3">
+							<label for="example-text-input" class="col-sm-4 col-form-label">프로젝트명</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" path="projName" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-text-input" class="col-sm-4 col-form-label">프로젝트설명</label>
+							<div class="col-sm-8">
+								<form:textarea class="form-control" path="projCntnt" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">시작일자</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" type="date" path="projStrtDt" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">만료일자</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" type="date" path="projEndDt" />
+
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button type="submit" id="okBtn" class="btn btn-primary">확인</button>
+					</div>
+				</form:form>
+			</div>
+		</div>
+	</div>
+
+
+
+	<script type="text/javascript">
+	
+	$(function() {
+		$("#insertBtn").on("click", function() {
+			$('#insertModal').modal('show')
+		})
+		$("#okBtn").on("click", function() {
+			$('#insertModal').modal('hide')
+		})
+
+	})
+	</script>
+</body>
+</html>

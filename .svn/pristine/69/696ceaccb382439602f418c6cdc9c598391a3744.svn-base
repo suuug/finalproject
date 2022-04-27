@@ -1,0 +1,57 @@
+	
+function removeClass(p_obj, p_list){
+//	 	console.log(p_obj);
+	for(var i=0; i<p_list.length; i++){
+		$(p_obj).removeClass(p_list[i]);
+//	 		console.log(p_list[i]);
+	}
+}
+$(function(){
+//	alert("js파일");
+//	alert(projId);
+	
+	$("#projTab .nav-link").on("click", function(){
+		var clicktab = $(this).attr('id'); 
+		var projId = $(this).data("projid");
+		var tabList = [];
+		tabList = $("#projTab .nav-link")
+		removeClass(tabList, "active");
+		$(this).addClass("active");
+		
+		if(clicktab=="home"){
+			location.href = "/project/home?projId="+projId;
+		}
+		
+		if(clicktab=="work"){
+			location.href = "/project/work?projId="+projId;
+		}
+		
+		if(clicktab=="ganttchart"){
+			location.href = "/project/ganttchart?projId="+projId;
+		}
+		
+		if(clicktab=="calendar"){
+			location.href = "/project/calendar?projId="+projId;
+		}
+	});
+//	$("#home").on("click", function(){
+//		location.href = "/project/home?projId="+projId;
+//	});
+//	$("#work").on("click", function(){
+//		var projId = $(this).data("projid");
+//		location.href = "/project/work?projId="+projId;
+//	});
+//	
+//	$("#calendar").on("click", function(){
+//		var projId = $(this).data("projid");
+//		location.href = "/project/calendar?projId="+projId;
+//	});
+//	
+//	$("#ganttchart").on("click", function(){
+//		var projId = $(this).data("projid");
+//		location.href = "/project/ganttchart?projId="+projId;
+//	});
+	
+	
+	
+})

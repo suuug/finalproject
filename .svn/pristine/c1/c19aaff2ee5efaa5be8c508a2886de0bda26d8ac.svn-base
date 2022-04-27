@@ -1,0 +1,161 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+
+    <link rel="stylesheet" href="/resources/gantt/dist/style.css" />
+    <link rel="stylesheet" href="/resources/gantt/reset.css" />
+<div class="row">
+	<div class="col-lg-12">
+		<div class="card">
+			<div class="card-body">
+			
+				<%@ include file="includeTab.jsp" %>
+					
+			    <div id="gstc"></div>
+		    
+    		</div>
+    	</div>
+    </div>
+</div>
+    
+    
+    <script src="/resources/gantt/dist/gstc.wasm.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/timeline-pointer.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/selection.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/item-movement.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/item-resizing.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/calendar-scroll.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/highlight-weekends.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/progress-bar.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/time-bookmarks.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/dependency-lines.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/export-image.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/export-pdf.umd.min.js"></script>
+    <script src="/resources/gantt/dist/plugins/item-resizing.umd.min.js"></script>
+	
+	<script src="/resources/js/project.js"></script>
+    <!-- replace this path  -->
+    <script>
+	$(function(){
+		
+		
+	});
+//       const rowsFromDB = [
+//         {
+//           id: '1',
+//           label: 'Row 1',
+          
+//         },
+//         {
+//           id: '2',
+//           label: 'Row 2',
+//         },
+//       ];
+		var rowsFromDB = [];
+		$.ajax({
+		  url: "/project/ganttdata",
+		  method: "GET",
+		  data : {
+			  'projId': "${sessionScope.projId }"
+		  },
+		  async: false,
+		  success: function (res) {
+			console.log(res);
+			rowsFromDB = res;
+			console.log(rowsFromDB);
+			
+		  },
+		  dataType: "json"
+		});
+
+      const itemsFromDB = [
+        {
+          id: '1',
+          label: 'Item 1',
+          rowId: '1',
+          time: {
+            start: GSTC.api.date('2020-03-28').startOf('day').valueOf(),
+            end: GSTC.api.date('2020-04-02').endOf('day').valueOf(),
+          },
+        },
+        {
+          id: '2',
+          label: 'Item 2',
+          rowId: '1',
+          time: {
+            start: GSTC.api.date('2020-02-01').startOf('day').valueOf(),
+            end: GSTC.api.date('2020-02-02').endOf('day').valueOf(),
+          },
+        },
+        {
+          id: '3',
+          label: 'Item 3',
+          rowId: '2',
+          time: {
+            start: GSTC.api.date('2020-01-15').startOf('day').valueOf(),
+            end: GSTC.api.date('2020-01-20').endOf('day').valueOf(),
+          },
+        },
+      ];
+		console.log(itemsFromDB);
+      const columnsFromDB = [
+        {
+          id: 'id',
+          label: 'ID',
+          data: ({ row }) => GSTC.api.sourceID(row.id), // show original id (not internal GSTCID)
+          sortable: ({ row }) => Number(GSTC.api.sourceID(row.id)), // sort by id converted to number
+          width: 80,
+          header: {
+            content: 'ID',
+          },
+        },
+        {
+          id: 'label',
+          data: 'label',
+          sortable: 'label',
+          isHTML: false,
+          width: 230,
+          header: {
+            content: 'Label',
+          },
+        },
+      ];
+
+      // Configuration object
+      const config = {
+        // for free key for your domain please visit https://gstc.neuronet.io/free-key
+        // if you need commercial license please visit https://gantt-schedule-timeline-calendar.neuronet.io/pricing
+
+        licenseKey:
+          '====BEGIN LICENSE KEY====\nImiajcI9wAehsAXUnGXDJSk+YWnT7vq2Qydib6v9mwB69KSlEyma3Ugn5jZzd8OBmGe3Y1USqOfkzlY57d/LZIwR5D8idUqGqNPUPZdvyBOV4HGYcewsgYGgdWV02f47lQ7j6RDlYBYAx9jtz1YGcbyZLwIKWslW8KHXseayiiy3aW9S7N5NujM3akISSDWh+zGQSb6mzuFmDu5h1cgMb9Q/ZI4Dhbi1sIX9v6ilvfUHuUkgXtxeV9t4cBPVaGgL40la91RM9Lah3jnwcpNA3XF1iTpfoU9sLzGQ9TMQpVTGZaTCqBYHGTL2C7g0/6K33VOfuhFn4dkqQnff760LDg==||U2FsdGVkX1+T6NDsw05MYHeu+STwMb/cBnKCwFEdMAlaH+/pieYKZHROna7SSfyE4HIq5MEEji/hJO3YUJgCwPnCIafAJm8ZegjeQfOxQgk=\nX3nCAVKTbvnTMzQ10rau9pKiIrwrfBtJgNPGAby7U4BgsECOTSs/3jHBl+EKsBC5cS+bxVE8ZxBHLBTOzDqMqUGOTwtWaQD3rwcaMwfNKh0ag2/x6ah0nB+KarlUmpa2AXhOCkouTJgmJDeGt0HwYsfl9Ja80ThHCTruh/cXu65FcCJW5EmNg/alpYVOzvA8gyyRub8CtdIZ7sQ7S6AgMAeMKve0RP8H/dp5cTBOGWiS24oXpOXLqtJjcKdKEI0qWO4/0O9ydmdW4rWCOLa3K78Dp69QSm3LbmoR2IITncd8v5A1UBvTsrUNltdv2LAto19DsBsQkO9/TDID3BllxQ==\n====END LICENSE KEY====',
+        plugins: [
+          TimelinePointer.Plugin(), // timeline pointer must go first before selection, resizing and movement
+          Selection.Plugin(),
+          ItemResizing.Plugin(), // resizing must fo before movement
+          ItemMovement.Plugin(),
+        ],
+        list: {
+          columns: {
+            data: GSTC.api.fromArray(columnsFromDB),
+          },
+          rows: GSTC.api.fromArray(rowsFromDB),
+        },
+        chart: {
+          items: GSTC.api.fromArray(itemsFromDB),
+        },
+      };
+
+      // Generate GSTC state from configuration object
+      const state = GSTC.api.stateFromConfig(config);
+      globalThis.state = state;
+
+      // Mount the component
+      const app = GSTC({
+        element: document.getElementById('gstc'),
+        state,
+      });
+
+      globalThis.gstc = app;
+      
+      
+    </script>

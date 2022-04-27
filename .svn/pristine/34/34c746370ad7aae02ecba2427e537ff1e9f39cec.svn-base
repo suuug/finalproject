@@ -1,0 +1,188 @@
+package kr.or.workTogether.attendance.controller;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.workTogether.attendance.service.AttendanceService;
+import kr.or.workTogether.common.vo.AtndnDlyVO;
+import kr.or.workTogether.common.vo.EmployeeVO;
+import kr.or.workTogether.security.CustomUser;
+
+@RequestMapping("/attendance")
+@Controller
+public class AttendanceController {
+
+	@Autowired
+	AttendanceService attendanceService;
+
+	public static final Logger logger = LoggerFactory.getLogger(AttendanceController.class);
+
+	@RequestMapping(value = "/recordMain")
+	public String recordMain() {
+		return "attendance/recordMain";
+	}
+
+	@ResponseBody
+	//@GetMapping("/start")
+	@RequestMapping(value="/recordStart", method = RequestMethod.GET, produces = "application/text; charset=UTF-8")
+//	public String start(@RequestParam("sdate") String sdate, @RequestParam("stime") String stime) {
+	// 이름을 변경하거나 데이터 타입을 변경할 때 @RequestParam 을 사용하면 된다.
+	public String start(@RequestParam String sdate, AtndnDlyVO atndnDlyVO, Authentication auth, Model model, HttpServletResponse response) throws ParseException {
+		System.err.println("sdate : "+sdate);
+		
+		CustomUser user = (CustomUser) auth.getPrincipal();
+		EmployeeVO userInfo = user.getUser();
+		
+		// 포맷터
+		SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
+		
+	    Date date = simpleFormat.parse(sdate);
+//		Date time = formatter.parse(stime);
+	    
+	    LocalTime now = LocalTime.now();
+	    
+	    if(now.getHour() > 9 && now.getMinute() >= 0 && now.getSecond() > 0) {
+	    	atndnDlyVO.setAtndnTypeId("late");
+	    }else {
+	    	atndnDlyVO.setAtndnTypeId("attendance");
+	    }
+	    
+	    String noticeMsg = null;
+	    
+	    System.err.println("date : "+date);
+	    atndnDlyVO.setEmpId(userInfo.getUsername());
+		atndnDlyVO.setAtndnDlyDt(date);
+		atndnDlyVO.setAtndnStrtDt(date);
+		
+		int result = attendanceService.getCountAtndnDly(userInfo.getUsername());
+		
+		if(result > 0) {
+			System.err.println("result : "+result);
+			noticeMsg = "이미 출근처리 되었습니다.";
+		}else {
+			attendanceService.recordStart(atndnDlyVO);
+			noticeMsg = "출근 처리 되었습니다.";
+		}
+//		atndnDlyVO.setAtndnDlyDt(time);
+		
+		logger.info("출근날짜 : " + date.toString() + " , 출근시간 : " +  date.getTime());
+		//response.setCharacterEncoding("UTF-8");
+		return noticeMsg;
+	}
+
+	@ResponseBody
+	@RequestMapping(value="/recordEnd", method=RequestMethod.GET, produces = "application/text; charset=UTF-8")
+	public String end(Authentication auth, @RequestParam String sdate, AtndnDlyVO atndnDlyVO) throws ParseException {
+		
+		CustomUser user = (CustomUser)auth.getPrincipal();
+		EmployeeVO userInfo = user.getUser();
+		
+		SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
+		Date date = simpleFormat.parse(sdate);
+		
+		LocalTime now = LocalTime.now();
+		
+		if(now.getHour() < 18 && now.getMinute() <= 59 && now.getSecond() <= 59) {
+			atndnDlyVO.setAtndnTypeId("earlyLeave");
+		}else {
+			atndnDlyVO.setAtndnTypeId("leave");
+		}
+		
+		atndnDlyVO.setAtndnEndDt(date);
+		
+		return null;
+	}
+	
+	@ResponseBody
+	@PostMapping("/state_ajax")
+	public List<AtndnDlyVO> statePost(@RequestParam(required = false) String year, Model model, AtndnDlyVO atndnDlyVO,
+			@RequestParam(required = false) String month, Authentication auth) {
+		month = (Integer.parseInt(month) + 1) + "";
+		logger.info("month >> " + month);
+		if (Integer.parseInt(month) < 10) {
+			month = "0" + (Integer.parseInt(month));
+		}
+		CustomUser user = (CustomUser) auth.getPrincipal();
+		EmployeeVO userInfo = user.getUser();
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("empId", userInfo.getUsername());
+
+		map.put("startDate", year + "-" + month + "-01 00:00:00");
+
+		if (Integer.parseInt(month) == 12) {
+			year = (Integer.parseInt(year) + 1) + "";
+			month = "01";
+		} else {
+			if (Integer.parseInt(month) < 10) {
+				month = "0" + (Integer.parseInt(month) + 1);
+			} else {
+				month = (Integer.parseInt(month) + 1) + "";
+			}
+		}
+
+		map.put("endDate", year + "-" + month + "-01 00:00:00");
+
+		logger.info("map >> " + map);
+
+		List<AtndnDlyVO> list = attendanceService.state(map);
+		return list;
+	}
+
+	@RequestMapping(value = "/state", method = RequestMethod.GET)
+	public String state(Model model, AtndnDlyVO atndnDlyVO, Authentication auth) {
+
+		logger.info("state >> entered");
+
+		CustomUser user = (CustomUser) auth.getPrincipal();
+		EmployeeVO userInfo = user.getUser();
+		String empId = userInfo.getUsername();
+
+		logger.info("empId :" + empId);
+		logger.info("ppp" + userInfo.toString());
+		logger.info("ddd" + userInfo.getUsername());
+
+//		List<AtndnDlyVO> list = attendanceService.state(empId);
+//		model.addAttribute("list", list);
+
+		atndnDlyVO.setEmpId(empId);
+		model.addAttribute("atndnDlyVO", atndnDlyVO);
+////		logger.info(list.size() > 0 ? list.get(0).toString() : "empty");
+
+		return "attendance/state";
+	}
+
+	@RequestMapping("/apply")
+	public String apply() {
+		return "attendance/apply";
+	}
+
+	@RequestMapping("/stateMem")
+	public String stateMem() {
+		return "attendance/stateMem";
+	}
+
+	@RequestMapping("/applyMem")
+	public String applyMem() {
+		return "attendance/applyMem";
+	}
+
+}

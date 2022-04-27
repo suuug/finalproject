@@ -1,0 +1,19 @@
+package kr.or.workTogether.attendance.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@RequestMapping("/attendance")
+@Controller
+public class AttendanceController {
+
+	@RequestMapping("/main")
+	public String main() {
+		return "attendance/main";
+	}
+	
+	@RequestMapping("/apply")
+	public String apply() {
+		return "attendance/apply";
+	}
+}

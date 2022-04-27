@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.workTogether.attendance.mapper.AttendanceMapper">
+
+	<!-- 근태현황 state list -->
+	<!-- 파라미터 값으로 VO나 ,map 을 쓰는데 map은 VO가 두가지 일때 -->
+	<select id="state" parameterType="hashMap"
+		resultType="atndnDlyVO">
+		<![CDATA[
+		SELECT
+		ATNDN_DLY_ID
+		,EMP_ID
+		,ATNDN_DLY_DT
+		,ATNDN_STRT_DT
+		,ATNDN_END_DT
+		,ATNDN_DLY_RSN
+		,ATNDN_TYPE_ID
+		FROM ATNDN_DLY
+		WHERE EMP_ID = #{empId}
+			AND ATNDN_DLY_DT >= To_Date(#{startDate},'YYYY-MM-DD HH24:MI:SS')
+			AND ATNDN_DLY_DT < To_Date(#{endDate},'YYYY-MM-DD HH24:MI:SS')
+		]]>
+		<!-- AND EXTRACT(MONTH FROM date) = (EXTRACT(MONTH FROM CURRENT\_DATE('Asia/Seoul')) -->
+
+		<!-- WHERE DATE_FORMAT(date컬럼,'%Y-%m') = DATE_FORMAT(now(),'2017-09'); -->
+		<!-- WHERE( date컬럼 > LAST_DAY(NOW() - interval 1 month) AND w_date <= LAST_DAY(NOW()) 
+			); -->
+		<!-- WHERE LEFT(date컬럼,7) = DATE_FORMAT(now(),'2017-09'); -->
+
+	</select>
+
+	<!-- 근태신청 apply -->
+	<select id="apply"></select>
+
+	<!-- 근태현황 state -->
+	<select id="stateMem"></select>
+
+	<!-- 근태신청 apply -->
+	<select id="applyMem"></select>
+
+	<!-- 출근기록 -->
+	<insert id="recordStart" parameterType="atndnDlyVO">
+		<selectKey keyProperty="atndnDlyId" resultType="string"
+			order="BEFORE">
+			SELECT 'ATDL' ||
+			LPAD(NVL(MAX(SUBSTR(ATNDN_DLY_ID,5,5)),0)+1,5,'0') FROM ATNDN_DLY
+		</selectKey>
+		INSERT INTO ATNDN_DLY
+		(ATNDN_DLY_ID
+		,EMP_ID
+		,ATNDN_DLY_DT
+		,ATNDN_STRT_DT
+		,ATNDN_TYPE_ID)
+
+		VALUES
+		(#{atndnDlyId}
+		,#{empId}
+		,#{atndnDlyDt}
+		,#{atndnStrtDt}
+		,#{atndnTypeId})
+	</insert>
+
+	<select id="getCountAtndnDly" resultType="int"
+		parameterType="string">
+		SELECT COUNT(*)
+		FROM ATNDN_DLY
+		WHERE EMP_ID = #{empId}
+		AND
+		TO_CHAR(ATNDN_DLY_DT,'YYYYMMDD') = TO_CHAR(SYSDATE,'YYYYMMDD')
+	</select>
+
+	<!-- 퇴근기록 -->
+	<update id="recordEnd" parameterType="atndnDlyVO">
+		UPDATE ATNDN_DLY
+		SET
+		ATNDN_END_DT = #{atndnEndDt}
+		,ATNDN_TYPE_ID = #{atndnTypeId}
+
+		WHERE
+		ATNDN_DLY_ID = #{atndnDlyId}
+		AND EMP_ID = #{empId}
+	</update>
+
+	<select id="getCountAtndnEndDt" resultType="int"
+		parameterType="String">
+		SELECT COUNT(*)
+		FROM ATNDN_DLY
+		WHERE ATNDN_DLY_ID =
+		#{atndnDlyId}
+		AND
+		TO_CHAR(ATNDN_END_DT,'YYYYMMDD') =
+		TO_CHAR(SYSDATE,'YYYYMMDD')
+	</select>
+
+	<select id="getAtndnDlyVO" resultType="atndnDlyVO" parameterType="atndnDlyVO">
+		SELECT ATNDN_DLY_ID,
+		EMP_ID, ATNDN_DLY_DT, ATNDN_STRT_DT, ATNDN_END_DT,
+		ATNDN_DLY_RSN, ATNDN_TYPE_ID
+		FROM ATNDN_DLY
+		WHERE ATNDN_DLY_ID = (SELECT MAX(ATNDN_DLY_ID) FROM ATNDN_DLY WHERE EMP_ID
+		= #{empId} )
+	</select>
+	
+	<!-- 해당 날짜에 대한 DB정보 가져오기 -->
+	<select id="dateSelectType" parameterType="atndnDlyVO" resultType="atndnDlyVO">
+		SELECT *
+		FROM ATNDN_DLY
+		WHERE to_char(ATNDN_DLY_DT, 'YYYY-MM-DD') = #{atndnDlyDt} 
+			and emp_id = #{empId}
+	</select>
+</mapper>
+

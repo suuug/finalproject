@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+.rowPriority{
+	color: orange;
+	font-size: 1.2em;
+
+}
+.highPriority{
+	color: green;
+	font-size: 1.2em;
+}
+
+.offcanvas-end {
+    width: 550px;
+}
+.icon{
+	display: inline-block;
+	width: 20px;
+	text-align: center;
+}
+.membtn{
+	margin-right: 5px;
+	margin-top: 5px;
+}
+.app-search{
+	padding: 0px;
+}
+.dateLabel{
+	font-size: 0.8em;
+}
+.fa-calendar{
+	margin-top: 20px;
+}

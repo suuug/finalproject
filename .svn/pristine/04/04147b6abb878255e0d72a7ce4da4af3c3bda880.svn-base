@@ -1,0 +1,82 @@
+package kr.or.workTogether.email.service;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.or.workTogether.common.vo.EmailVO;
+
+public interface EmailService {
+
+	// 메일 전송하기
+	public int sendMail(EmailVO emailVO);
+
+	// 임시 보관하기
+	public int unsentMail(EmailVO emailVO);
+
+	// 보낸 메일함 조회
+	public List<EmailVO> sendMailBox(Map<String, Object> map);
+
+	// 보낸 메일함 리스트 totalCount
+	public int sendListCount(Map<String, Object> map);
+
+	// 임시보관함 조회
+	public List<EmailVO> unsentMailBox(Map<String, Object> map);
+
+	// 임시보관함 리스트 totalCount
+	public int unsentListCount(Map<String, Object> map);
+
+	// 보낸 메일의 상세정보
+	public List<EmailVO> sendMailDetail(String emailId);
+
+	// 임시보관 메일의 상세정보
+	public EmailVO unsentMailDetail(String emailId);
+
+	// 보낸 메일 삭제하기
+	public int sendMailDel(String emailId);
+
+	// 임시보관메일 삭제하기
+	public int unsentMailDel(String emailId);
+
+	// 임시보관메일 전송하기
+	public int unsentMailSend(EmailVO emailVO);
+
+	// 휴지통리스트 조회
+	public List<EmailVO> trashMailBox(Map<String, Object> map);
+
+	// 휴지통 리스트 totalCount
+	public int trashListCount(Map<String, Object> map);
+
+	// 휴지통 비우기
+	public int deleteAll();
+
+	// 휴지통에서 선택한 메일 복구하기
+	public int restoreMail(String emailId);
+
+	// 체크박스로 선택한 메일만 삭제되도록 하기 (휴지통영구삭제)
+	public int deletechoice(String emailId);
+
+	// 체크박스로 선택한 메일만 삭제되도록 하기 (보낸메일함)
+	public int deletesendChoice(String emailId);
+
+	// 체크박스로 선택한 메일만 삭제되도록 하기 (임시보관함)
+	public int deleteunsentChoice(String emailId);
+
+	// 받은 메일함 리스트 출력하기
+	public List<EmailVO> reMailBox(Map<String, Object> map);
+
+	// 받은 메일함의 토탈 카운트
+	public int reListCount(Map<String, Object> map);
+
+	// 체크박스로 선택한 메일만 삭제되도록 하기 (받은메일함)
+	public int deletereChoice(String emailId);
+
+	// 받은 메일의 상세정보
+	public List<EmailVO> reMailDetail(String emailId);
+
+	// 받은메일 삭제하기
+	public int reMailDel(String emailId);
+
+	// 읽음여부 처리하기
+	public int readUpdate(String emailId);
+
+}

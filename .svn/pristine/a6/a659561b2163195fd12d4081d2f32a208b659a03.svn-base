@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.workTogether.email.mapper.EmailMapper">
+
+	<!-- 메일 전송하기 insert -->
+	<!-- 메일코드,메일내용,메일제목,메일작성일자,메일수정일자,메일삭제일자,메일보낸직원,메일받은직원,메일유형코드 -->
+	<insert id="sendMail" parameterType="emailVO" >
+	INSERT INTO email(EMAIL_ID,EMAIL_CNTNT,EMAIL_TITLE,
+	                  EMAIL_WRT_DT,
+	                  EMAIL_SEND_ID,EMAIL_RCV_ID,EMAIL_TYPE_ID) 
+	VALUES((SELECT 'EMIL' || LPAD(NVL(MAX(SUBSTR(EMAIL_ID,5,5)),0)+1,5,'0') FROM EMAIL)
+			,#{emailCntnt}
+			,#{emailTitle}
+			,SYSDATE
+			,#{emailSendId}
+			,#{emailRcvId}
+			,'1')
+	</insert>
+
+	<!-- 임시보관하기 insert -->
+	<insert id="unsentMail" parameterType="emailVO" >
+	INSERT INTO email(EMAIL_ID,EMAIL_CNTNT,EMAIL_TITLE,
+	                  EMAIL_WRT_DT,
+	                  EMAIL_SEND_ID,EMAIL_RCV_ID,EMAIL_TYPE_ID) 
+	VALUES((SELECT 'EMIL' || LPAD(NVL(MAX(SUBSTR(EMAIL_ID,5,5)),0)+1,5,'0') FROM EMAIL)
+			,#{emailCntnt}
+			,#{emailTitle}
+			,SYSDATE
+			,#{emailSendId}
+			,#{emailRcvId}
+			,'2')
+	</insert>
+	
+	<!-- 보낸 메일함 조회하기  -->
+	<!-- 
+	키워드가 공백이 아니거나 null이 아닐경우 ,즉 검색창에 무언갈 입력했을 경우
+	제목과 키워드의 일부분이 일치하는 것을 찾아주기 위해서 if문을 사용한다. 	
+     -->
+	<select id="sendMailBox" parameterType="hashMap" resultType="emailVO" >
+	SELECT  T.RNUM
+		   ,T.EMAIL_ID
+		   ,T.EMAIL_RCV_ID
+		   ,T.EMAIL_TITLE
+		   ,T.EMAIL_WRT_DT
+	  FROM 
+	  (
+		  	SELECT ROW_NUMBER() OVER (ORDER BY EMAIL_ID) RNUM
+		  		  ,EMAIL_ID
+		  		  ,EMAIL_RCV_ID
+		  		  ,EMAIL_TITLE
+		  	      ,EMAIL_WRT_DT
+		  	FROM EMAIL
+		  	WHERE EMAIL_TYPE_ID = '1'
+		  	  AND EMAIL_SEND_ID='EMPL00001'  <!-- 나중에 로그인한 세션아이디로 바꿔주기 -->
+		    <if test="keyWord!=null and keyWord!=''">
+			    AND (EMAIL_RCV_ID LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%')
+		    </if>
+	  )T
+	 WHERE T.RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<!-- 보낸메일함의 totalCount -->
+	<select id="sendListCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM   EMAIL
+		WHERE  EMAIL_TYPE_ID = '1'
+		AND EMAIL_SEND_ID='EMPL00001'  <!-- 나중에 로그인한 세션아이디로 바꿔주기 -->
+	    <if test="keyWord!=null and keyWord!=''">
+		    AND(EMAIL_RCV_ID LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%')
+	    </if>
+	</select>
+	
+
+	<!-- 임시보관함 조회하기 -->
+	<select id="unsentMailBox" parameterType="hashMap" resultType="emailVO" >
+	SELECT  T.RNUM
+		   ,T.EMAIL_ID
+		   ,T.EMAIL_RCV_ID
+		   ,T.EMAIL_TITLE
+		   ,T.EMAIL_WRT_DT
+	  FROM 
+	  (
+		  	SELECT ROW_NUMBER() OVER (ORDER BY EMAIL_ID) RNUM
+		  		  ,EMAIL_ID		  		
+		  		  ,EMAIL_RCV_ID
+		  		  ,EMAIL_TITLE
+		  	      ,EMAIL_WRT_DT
+		  	FROM EMAIL
+		  	WHERE  EMAIL_TYPE_ID = '2'
+		  	AND EMAIL_SEND_ID='EMPL00001'  <!-- 나중에 로그인한 세션아이디로 바꿔주기 -->
+		    <if test="keyWord!=null and keyWord!=''">
+			    AND (EMAIL_RCV_ID LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%')
+		    </if>
+	  )T
+	 WHERE T.RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<!-- 임시보관함의 totalCount -->
+	<select id="unsentListCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM   EMAIL
+		WHERE  EMAIL_TYPE_ID = '2'
+		AND EMAIL_SEND_ID='EMPL00001'  <!-- 나중에 로그인한 세션아이디로 바꿔주기 -->
+	    <if test="keyWord!=null and keyWord!=''">
+		    AND(EMAIL_RCV_ID LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%')
+	    </if>
+	</select>
+	
+	<!-- 보낸 메일함 상세정보 -->
+	<select id="sendMailDetail" parameterType="String" resultType="emailVO">
+		SELECT EMAIL_ID,EMAIL_SEND_ID,EMAIL_RCV_ID,EMAIL_TITLE,EMAIL_CNTNT,EMAIL_WRT_DT
+		  FROM EMAIL
+		 WHERE EMAIL_ID=#{emailId}
+	</select>
+	
+	<!-- 임시보관함 상세정보 -->
+	<select id="unsentMailDetail" parameterType="String" resultType="emailVO">
+		SELECT EMAIL_ID,EMAIL_SEND_ID,EMAIL_RCV_ID,EMAIL_TITLE,EMAIL_CNTNT,EMAIL_WRT_DT
+		  FROM EMAIL
+		 WHERE EMAIL_ID=#{emailId}
+	</select>
+
+	<!-- 보낸 메일함에서 메일삭제하기 -->
+	<!-- 여기서 삭제는 휴지통으로 들어가야 하기 때문에 DELETE가 아닌UPDATE를 통해서 
+		  메일의 유형번호를 변경해줄 것이다.
+		  보낸 메일함에서 삭제한 메일의 유형번호는 11로 변경시킨다. -->
+	<update id="sendMailDel" parameterType="String">
+		 UPDATE EMAIL
+		    SET EMAIL_TYPE_ID ='11',
+		    	EMAIL_DEL_DT=SYSDATE
+		  WHERE EMAIL_ID =#{emailId}
+	</update>
+	
+	<!-- 임시보관함에서 메일 삭제하기 -->
+	<!-- 임시보관함에서 삭제한 메일의 유형번호는 22로 변경시킨다.  -->
+	<update id="unsentMailDel" parameterType="String">
+		 UPDATE EMAIL
+		    SET EMAIL_TYPE_ID ='22',
+		    EMAIL_DEL_DT=SYSDATE
+		  WHERE EMAIL_ID =#{emailId}
+	</update>
+	
+	<!-- 임시보관함에서 메일 전송하기 -->
+	<update id="unsentMailSend" parameterType="emailVO">
+		 UPDATE EMAIL
+		    SET EMAIL_TYPE_ID = '1'
+		       ,EMAIL_RCV_ID=#{emailRcvId}
+		       ,EMAIL_TITLE=#{emailTitle}
+		       ,EMAIL_CNTNT=#{emailCntnt}
+		       ,EMAIL_WRT_DT=SYSDATE
+		  WHERE EMAIL_ID = #{emailId}
+	</update>
+	
+	<!-- 휴지통 목록 조회하기  -->
+	<select id="trashMailBox" parameterType="hashMap" resultType="emailVO" >
+	SELECT  T.RNUM
+		   ,T.EMAIL_ID
+		   ,T.EMAIL_RCV_ID
+		   ,T.EMAIL_TITLE
+		   ,T.EMAIL_WRT_DT
+		   ,T.EMAIL_DEL_DT
+	  FROM 
+	  (
+		  	SELECT ROW_NUMBER() OVER (ORDER BY EMAIL_ID) RNUM
+		  		  ,EMAIL_ID		  		
+		  		  ,EMAIL_RCV_ID
+		  		  ,EMAIL_TITLE
+		  	      ,EMAIL_WRT_DT
+		  	      ,EMAIL_DEL_DT
+		  	FROM EMAIL
+		  	WHERE EMAIL_TYPE_ID IN( '11','22','33')
+		    <if test="keyWord!=null and keyWord!=''">
+			    AND (EMAIL_RCV_ID LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_DEL_DT LIKE '%'||#{keyWord}||'%')
+		    </if>
+	  )T
+	 WHERE T.RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<!-- 휴지통의 totalCount -->
+	<select id="trashListCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM   EMAIL
+		WHERE  EMAIL_TYPE_ID IN( '11','22','33')
+	    <if test="keyWord!=null and keyWord!=''">
+		    AND(EMAIL_RCV_ID LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_DEL_DT LIKE '%'||#{keyWord}||'%')
+	    </if>
+	</select>
+	
+	<!-- 휴지통 비우기  -->
+	<delete id="deleteAll" >
+	DELETE EMAIL
+	 WHERE EMAIL_TYPE_ID IN ('11','22','33')
+	</delete>
+	
+	<!-- 선택한 메일 복구하기 -->
+	<update id="restoreMail" parameterType="String">
+	--선택한 메일 복구하기
+		 UPDATE EMAIL 
+		    SET EMAIL_TYPE_ID =
+		   CASE
+		       WHEN  EMAIL_TYPE_ID LIKE '11' THEN '1'
+		       WHEN  EMAIL_TYPE_ID LIKE '22' THEN '2'
+		       WHEN  EMAIL_TYPE_ID LIKE '33' THEN '1'
+		    END
+		  WHERE EMAIL_ID = #{emailId}
+	</update>
+	
+	<!-- 휴지통 체크박스로 메일 개별 삭제하기  -->
+	<delete id="deletechoice" parameterType="String">
+		 DELETE EMAIL 
+ 		  WHERE EMAIL_ID = #{emailId}
+	</delete>
+	
+	<!-- 보낸 메일함에서 체크박스로 메일 삭제하기  -->
+	<update id="deletesendChoice" parameterType="String">
+		UPDATE EMAIL
+		   SET EMAIL_TYPE_ID ='11'
+		 WHERE EMAIL_ID = #{emailId}
+	</update>
+	
+	<!-- 임시보관함에서 체크박스로 메일 삭제하기 -->
+	<update id="deleteunsentChoice" parameterType="String">
+		UPDATE EMAIL
+		   SET EMAIL_TYPE_ID ='22'
+		 WHERE EMAIL_ID = #{emailId}
+	</update>
+	
+	<!-- 받은 메일함 리스트 출력하기  -->
+	<select id="reMailBox" parameterType="hashMap" resultType="emailVO" >
+		SELECT  T.RNUM
+			   ,T.EMAIL_ID
+			   ,T.EMAIL_SEND_ID
+			   ,T.EMAIL_TITLE
+			   ,T.EMAIL_WRT_DT
+	  FROM 
+	  (
+		  	SELECT ROW_NUMBER() OVER (ORDER BY EMAIL_ID) RNUM
+		  		  ,EMAIL_ID
+		  		  ,EMAIL_SEND_ID
+		  		  ,EMAIL_TITLE
+		  	      ,EMAIL_WRT_DT
+		  	FROM EMAIL
+		  	WHERE EMAIL_TYPE_ID = '1'
+              AND EMAIL_RCV_ID='EMPL00001'  <!-- 이부분은 세션아이디로 바꿔줘야 한다. -->
+		    <if test="keyWord!=null and keyWord!=''">
+			    AND (EMAIL_SEND_ID LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+			    OR   EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%')
+		    </if>
+	  )T
+	 WHERE T.RNUM BETWEEN #{start} AND #{end}
+	</select>
+	
+	<!-- 받은 메일함의 toalCount -->
+	<select id="reListCount" parameterType="hashMap" resultType="int" >
+	     SELECT COUNT(*)
+		FROM EMAIL
+       WHERE EMAIL_TYPE_ID = '1'
+         AND EMAIL_RCV_ID='EMPL00001'
+	    <if test="keyWord!=null and keyWord!=''">
+		    AND(EMAIL_SEND_ID LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_TITLE LIKE '%'||#{keyWord}||'%'
+		    OR EMAIL_WRT_DT LIKE '%'||#{keyWord}||'%')
+	    </if>
+	</select>
+	
+	<!-- 받은메일함에서 체크박스로 메일 삭제하기 -->
+	<update id="deletereChoice" parameterType="String">
+		UPDATE EMAIL
+		   SET EMAIL_TYPE_ID ='33'
+		 WHERE EMAIL_ID = #{emailId}
+	</update>
+
+	<!-- 받은메일함 상세정보 -->
+	<select id="reMailDetail" parameterType="String" resultType="emailVO">
+		SELECT EMAIL_ID,EMAIL_SEND_ID,EMAIL_RCV_ID,EMAIL_TITLE,EMAIL_CNTNT,EMAIL_WRT_DT
+		  FROM EMAIL
+		 WHERE EMAIL_ID=#{emailId}
+	</select>
+
+
+	<!-- 받은메일함에서 메일 삭제하기 -->
+	<!-- 받은메일함에서 삭제한 메일의 유형번호는 33로 변경시킨다.  -->
+	<update id="reMailDel" parameterType="String">
+		 UPDATE EMAIL
+		    SET EMAIL_TYPE_ID ='33',
+		    EMAIL_DEL_DT=SYSDATE
+		  WHERE EMAIL_ID =#{emailId}
+	</update>
+	
+	
+</mapper>
+
+
+
+

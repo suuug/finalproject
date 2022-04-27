@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.workTogether.schedule.mapper.ScheduleMapper">
+
+	<resultMap type="calendarVO" id="calMap">
+		<result property="start" column="start1" />
+		<result property="end" column="end1" />
+	</resultMap>
+
+	<!-- 일정 보여주기 -->
+	<select id="calendar" parameterType="String" resultMap="calMap">
+		SELECT
+		SCHDL_ID
+		,SCHDL_TITLE
+		,SCHDL_CNTNT
+		,TO_char(SCHDL_STRT_DT,	'YYYY-MM-DD"T"HH24:MI:SS') start1
+		,TO_char(SCHDL_END_DT,	'YYYY-MM-DD"T"HH24:MI:SS') end1
+		,SCHDL_WRTR
+		,SCHDL_WRT_DT
+		FROM SCHEDULE
+		WHERE SCHDL_ID =#{schdlId}
+	</select>
+
+</mapper>
+

@@ -1,0 +1,211 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+
+<div class="card">
+	<div class="card-body">
+		<div
+			class="page-title-box d-flex align-items-center justify-content-between">
+			<h4 class="mb-0">
+				<a href="/attendance/state">근태현황</a>
+			</h4>
+
+			<div class="page-title-right">
+				<button type="button"
+					class="btn btn-sm btn-light waves-effect waves-light">
+					<a href="/attendance/state">나의 근태</a>
+				</button>
+				<button type="button"
+					class="btn btn-sm btn-light waves-effect waves-light">
+					<a href="/attendance/stateMem">사원 근태</a>
+				</button>
+			</div>
+		</div>
+
+		<br>
+		<h2 align="center">2022년 4월</h2>
+		<br> <br>
+
+		<div align="right">
+			<button type="button" data-bs-toggle="modal"
+				data-bs-target="#exampleModal"
+				class="btn btn-sm btn-light waves-effect waves-light" id="ajax-late">
+				지각/결근 사유 입력</button>
+		</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="exampleModal" tabindex="-1"
+			aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">사유서 작성</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form method="post" name="f2">
+							<table class="table table-sm">
+								<tr>
+									<td style="width: 180px;">날짜 선택</td>
+									<td><input type="text" id="f2_name" name="name" value=""
+										maxlength="10"></td>
+								</tr>
+								<tr>
+									<td>사유입력</td>
+									<td><textarea id="f2_hp" name="hp" placeholder="사유를 입력하세요"
+											rows="10"></textarea></td>
+								</tr>
+							</table>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button type="button" class="btn btn-primary" onclick="viewChk()">제출하기</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<div align="left">
+			<button class="btn btn-sm btn-primary" style="cursor: default">
+				<span style="position: relative">재택</span>
+			</button>
+			<button class="btn btn-sm btn-secondary" style="cursor: default">외근</button>
+			<button class="btn btn-sm btn-success" style="cursor: default">연차</button>
+			<button class="btn btn-sm btn-info" style="cursor: default">휴가</button>
+			<button class="btn btn-sm btn-warning" style="cursor: default">지각</button>
+			<button class="btn btn-sm btn-danger" style="cursor: default">결근</button>
+		</div>
+		<br>
+
+		<div class="table-responsive">
+			<table class="table mb-0">
+				<thead align="center">
+					<tr>
+						<th>주차</th>
+						<th>월</th>
+						<th>화</th>
+						<th>수</th>
+						<th>목</th>
+						<th>금</th>
+						<th>비고</th>
+					</tr>
+				</thead>
+				<tbody align="center">
+					<tr>
+						<th scope="row">1</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">2</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">3</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">4</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">5</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+				</tbody>
+			</table>
+			<br>
+			<div align="right">
+				<div class="dt-buttons btn-group flex-wrap">
+					<button class="btn btn-secondary buttons-pdf buttons-html5 "
+						tabindex="0" aria-controls="datatable-buttons" type="button">
+						<span>PDF 출력하기</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<script>
+	$('a[href="#view"]').click(function(event) {
+		event.preventDefault();
+
+		$(this).modal({
+			fadeDuration : 250,
+		/*
+		 escapeClose: false,
+		 clickClose: false,
+		 showClose: false
+		 */
+		});
+	});
+	function viewChk() {
+		var form = document.f2;
+		if (!form.name.value) {
+			alert("지각/결근 중 선택해 주십시오.");
+			form.name.focus();
+			return;
+		}
+		if (!form.hp.value) {
+			alert("사유를 입력해 주십시오.");
+			form.hp.focus();
+			return;
+		}
+
+		$.ajax({
+			type : "post",
+			url : "ajax_viewChk.asp",
+			data : {
+				name : $("#f2_name").val(),
+				hp : $("#f2_hp").val(),
+				target_month : ''
+			},
+			dataType : "text",
+			success : function(data, status, xhr) {
+				var display = document.getElementById("view");
+				if (data != "") {
+					display.innerHTML = data;
+				}
+
+			},
+			error : function(xhr, status, error) {
+				console.log(error);
+			}
+
+		});
+	}
+</script>

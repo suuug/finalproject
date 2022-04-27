@@ -1,0 +1,63 @@
+package kr.or.workTogether.authorization.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.workTogether.authorization.mapper.AuthorizationMapper;
+import kr.or.workTogether.authorization.service.AuthorizationService;
+import kr.or.workTogether.common.vo.AtrzDocVO;
+import kr.or.workTogether.common.vo.AtrzLineDetailVO;
+import kr.or.workTogether.common.vo.AtrzLineVO;
+import kr.or.workTogether.common.vo.CommonCodeVO;
+import kr.or.workTogether.common.vo.DepartmentVO;
+
+@Service
+public class AuthorizationServiceImpl implements AuthorizationService {
+
+	@Autowired
+	private AuthorizationMapper authoMapper;
+	
+	@Override
+	public List<CommonCodeVO> getDocFormList() {
+		return authoMapper.getDocFormList();
+	}
+
+	@Override
+	public List<CommonCodeVO> getDocRetentionList() {
+		return authoMapper.getDocRetentionList();
+	}
+
+	@Override
+	public int insertAtrzDoc(AtrzDocVO atrzDocVO) {
+		return authoMapper.insertAtrzDoc(atrzDocVO);
+	}
+
+	@Override
+	public List<DepartmentVO> getTreeList() {
+		return authoMapper.getTreeList();
+	}
+
+	@Override
+	public String insertAtrzLine(AtrzLineVO atrzLineVO) {
+		authoMapper.insertAtrzLine(atrzLineVO);
+		return atrzLineVO.getAtrzLineId();
+	}
+
+	@Override
+	public int insertAtrzLineDetail(AtrzLineDetailVO atrzLineDetailVO) {
+		return authoMapper.insertAtrzLineDetail(atrzLineDetailVO);
+	}
+
+	@Override
+	public List<AtrzDocVO> getTempDocList(String docWrtr) {
+		return authoMapper.getTempDocList(docWrtr);
+	}
+
+	@Override
+	public AtrzDocVO getTempDoc(String docId) {
+		return authoMapper.getTempDoc(docId);
+	}
+
+}

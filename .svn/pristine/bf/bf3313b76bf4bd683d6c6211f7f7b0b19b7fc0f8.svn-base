@@ -1,0 +1,9 @@
+package kr.or.workTogether.memo.service;
+
+import kr.or.workTogether.common.vo.MemoVO;
+
+public interface MemoService {
+
+	//메모 작성하기
+	public int writeMemo (MemoVO memoVO);
+}

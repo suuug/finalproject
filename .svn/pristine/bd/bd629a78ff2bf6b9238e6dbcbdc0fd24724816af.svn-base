@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.workTogether.authorization.mapper.AuthorizationMapper">
+	
+	
+	<resultMap type="departmentVO" id="departmentMap">
+		<id property="topDeptId" column="TOP_DEPT_ID" />
+<!-- 		<result property="deptId" column="DEPT_ID" /> -->
+		<result property="deptLevel" column="DEPT_LEVEL" />
+<!-- 		<result property="deptName" column="DEPT_NAME" /> -->
+		<result property="topDeptName" column="TOP_DEPT_NAME" />
+		<collection property="deptList" resultMap="deptListMap" />
+	</resultMap>
+	
+	<resultMap type="departmentVO" id="deptListMap">
+		<id property="deptId" column="DEPT_ID" />
+		<result property="deptName" column="DEPT_NAME" />
+		<collection property="employeeList" resultMap="employeeMap" />
+	</resultMap>
+	
+	<resultMap type="employeeVO" id="employeeMap">
+		<result property="empId" column="EMP_ID" />
+		<result property="empName" column="EMP_NAME" />
+		<result property="empPosition" column="EMP_POSITION" />
+		<result property="cmmnGroupName" column="CMMN_GROUP_NAME" />
+	</resultMap>
+	
+	
+	<!-- 문서양식(LIST) -->
+	<select id="getDocFormList" resultType="commonCodeVO">
+		SELECT CMMN_ID, CMMN_GROUP_ID, CMMN_GROUP_NAME, CMMN_NM1, CMMN_NM2, 
+			   CMMN_NM3, CMMN_OPT1, CMMN_OPT2, CMMN_OPT3, CMMN_YN, CMMN_CLOB
+		  FROM COMMON_CODE
+		 WHERE CMMN_GROUP_ID = 'A1'
+	</select>
+	
+	<!-- 보존연한(LIST) -->
+	<select id="getDocRetentionList" resultType="commonCodeVO">
+		SELECT CMMN_ID, CMMN_GROUP_ID, CMMN_GROUP_NAME, CMMN_NM1, CMMN_NM2, 
+			   CMMN_NM3, CMMN_OPT1, CMMN_OPT2, CMMN_OPT3, CMMN_YN, CMMN_CLOB 
+		  FROM COMMON_CODE
+		 WHERE CMMN_GROUP_ID = 'A4'
+	</select>
+	
+	<!-- 결재문서(ISNERT) -->
+	<insert id="insertAtrzDoc" parameterType="atrzDocVO">
+		INSERT INTO ATRZ_DOC(
+			DOC_ID, DOC_TITLE, DOC_CNTNT, DOC_STATE, 
+            ATRZ_LEVEL, DOC_TYPE_ID, DOC_MDFY_DT, DOC_WRT_DT, 
+            DOC_WRTR, ATRZ_LINE_STR, DOC_WRTR_NAME, DOC_RETENTION, DOC_DEPT_NAME)
+		VALUES((SELECT 'ATDO' || LPAD(NVL(MAX(SUBSTR(DOC_ID,5,5)),0)+1,5,'0') FROM ATRZ_DOC),
+				#{docTitle},#{docCntnt},'대기중',
+				1,#{docTypeId},NULL,SYSDATE,
+				#{docWrtr},#{atrzLineStr},#{docWrtrName},#{docRetention},#{docDeptName})
+	</insert>
+	
+	<!-- 조직도 리스트 -->
+	<select id="getTreeList" resultMap="departmentMap">
+SELECT A.DEPT_ID,
+       A.TOP_DEPT_ID,
+       A.DEPT_LEVEL,
+       A.DEPT_NAME, 
+       A.EMP_ID,
+       A.EMP_NAME,
+       C.DEPT_NAME AS TOP_DEPT_NAME,
+       A.EMP_POSITION,
+       F.CMMN_GROUP_NAME
+  FROM(
+        SELECT D.DEPT_ID,
+               D.TOP_DEPT_ID,
+               D.DEPT_LEVEL,
+               D.DEPT_NAME, 
+               E.EMP_ID,
+               E.EMP_NAME,
+               E.EMP_POSITION
+        FROM( SELECT DEPT_ID,
+                     TOP_DEPT_ID,
+                     DEPT_LEVEL,
+                     DEPT_NAME
+                FROM DEPARTMENT 
+               START WITH TOP_DEPT_ID IS NULL
+             CONNECT BY PRIOR DEPT_ID = TOP_DEPT_ID
+               ORDER SIBLINGS BY DEPT_ID
+            ) D INNER JOIN EMPLOYEE E
+                ON(D.DEPT_ID = E.DEPT_ID)
+        ORDER BY D.DEPT_ID
+    ) A, DEPARTMENT C, COMMON_CODE F
+ WHERE A.TOP_DEPT_ID = C.DEPT_ID 
+   AND A.EMP_POSITION = F.CMMN_ID
+	</select>
+<!-- 	<select id="getTreeList" resultMap="departmentMap"> -->
+<!-- 		SELECT A.DEPT_ID, -->
+<!-- 		       A.TOP_DEPT_ID, -->
+<!-- 		       A.DEPT_LEVEL, -->
+<!-- 		       A.DEPT_NAME,  -->
+<!-- 		       A.EMP_ID, -->
+<!-- 		       A.EMP_NAME, -->
+<!-- 		       C.DEPT_NAME AS TOP_DEPT_NAME -->
+<!-- 		  FROM( -->
+<!-- 		        SELECT D.DEPT_ID, -->
+<!-- 		               D.TOP_DEPT_ID, -->
+<!-- 		               D.DEPT_LEVEL, -->
+<!-- 		               D.DEPT_NAME,  -->
+<!-- 		               E.EMP_ID, -->
+<!-- 		               E.EMP_NAME -->
+<!-- 		        FROM( SELECT DEPT_ID, -->
+<!-- 		                     TOP_DEPT_ID, -->
+<!-- 		                     DEPT_LEVEL, -->
+<!-- 		                     DEPT_NAME -->
+<!-- 		                FROM DEPARTMENT  -->
+<!-- 		               START WITH TOP_DEPT_ID IS NULL -->
+<!-- 		             CONNECT BY TOP_DEPT_ID = PRIOR DEPT_ID -->
+<!-- 		               ORDER SIBLINGS BY DEPT_ID -->
+<!-- 		            ) D INNER JOIN EMPLOYEE E -->
+<!-- 		                ON(D.DEPT_ID = E.DEPT_ID) -->
+<!-- 		        ORDER BY D.DEPT_ID -->
+<!-- 		    ) A, DEPARTMENT C -->
+<!-- 		 WHERE A.TOP_DEPT_ID = C.DEPT_ID -->
+<!-- 	</select> -->
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

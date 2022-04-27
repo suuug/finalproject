@@ -1,0 +1,39 @@
+package kr.or.workTogether.attendance.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.workTogether.attendance.mapper.AttendanceMapper;
+import kr.or.workTogether.attendance.service.AttendanceService;
+import kr.or.workTogether.common.vo.AtndnAplictVO;
+import kr.or.workTogether.common.vo.AtndnDlyVO;
+
+@Service
+public class AttendanceServiceImpl implements AttendanceService{
+
+	@Autowired
+	AttendanceMapper attendanceMapper;
+	
+	@Override
+	public List<AtndnDlyVO> state() {
+		return attendanceMapper.state();
+	}
+
+	@Override
+	public List<AtndnAplictVO> apply() {
+		return attendanceMapper.apply();
+	} 
+	
+	@Override
+	public List<AtndnDlyVO> stateMem() {
+		return attendanceMapper.stateMem();
+	}
+	
+	@Override
+	public List<AtndnAplictVO> applyMem() {
+		return attendanceMapper.applyMem();
+	} 
+
+}

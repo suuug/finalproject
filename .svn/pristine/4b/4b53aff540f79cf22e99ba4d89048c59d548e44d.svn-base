@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.workTogether.project.mapper.ProjectMapper">
+	<resultMap type="projWorkVO" id="workMap">
+		<id property="workId" column="WORK_ID" />
+		<result property="workRqstr" column="WORK_RQSTR" />
+		<result property="workStrtDt" column="WORK_STRT_DT" />
+		<result property="workEndDt" column="WORK_END_DT" />
+		<result property="workProgress" column="WORK_PROGRESS" />
+		<result property="workState" column="WORK_STATE" />
+		<result property="workPriority" column="WORK_PRIORITY" />
+		<result property="workMdfyDt" column="WORK_MDFY_DT" />
+		<result property="workTitle" column="WORK_TITLE" />
+		<result property="workCntnt" column="WORK_CNTNT" />
+		<collection property="workMngr" resultMap="workMngrMap" />
+	</resultMap>
+	
+	<resultMap type="String" id="workMngrMap">
+		<result property="workMngrId" column="EMP_NAME" />
+	</resultMap>
+
+	<!-- 새프로젝트 추가하기 -->
+	<insert id="projInsert" parameterType="projectVO">
+		INSERT INTO project (
+			proj_id
+			,proj_name
+			,proj_cntnt
+			,proj_strt_dt
+			,proj_end_dt
+			,proj_state
+		)
+		VALUES (
+			(SELECT 'PROJ' ||
+			LPAD(NVL(MAX(SUBSTR(PROJ_ID,5,5)),0)+1,5,'0') FROM PROJECT)
+			,#{projName}
+			,#{projCntnt}
+			,#{projStrtDt}
+			,#{projEndDt}
+			,'진행중'
+		)
+	</insert>
+
+	<!-- 프로젝트 list를 가져옴 -->
+	<select id="projList" resultType="projectVO" parameterType="String">
+		SELECT
+			proj_id
+			,proj_name
+			,proj_cntnt
+			,proj_wrt_dt
+			,proj_strt_dt
+			,proj_end_dt
+			,proj_progress
+			,proj_state
+
+		FROM project
+		WHERE (SELECT proj_id
+				 FROM proj_mem
+				WHERE emp_id=#{empId}) = proj_id
+	</select>
+
+	<!-- 프로젝트 detail 가져옴 -->
+	<select id="projDetail" resultType="projectVO" parameterType="String">
+		SELECT
+			proj_id
+			,proj_name
+			,proj_cntnt
+			,proj_wrt_dt
+			,proj_strt_dt
+			,proj_end_dt
+			,proj_progress
+			,proj_state
+
+		FROM project
+		WHERE proj_id=#{projId}
+	</select>
+	
+	<!-- 프로젝트 멤버를 가져옴 -->
+	<select id="memberList" parameterType="String" resultType="employeeVO">
+		SELECT E.EMP_ID
+	   		  ,E.EMP_NAME
+		FROM  PROJ_MEM M, EMPLOYEE E
+		WHERE E.EMP_ID = M.EMP_ID
+		AND   M.PROJ_ID = #{projId}
+	</select>
+	
+	<!-- 업무를 추가함 -->
+	<insert id="insertWork" parameterType="projWorkVO">
+		<selectKey keyProperty="workId" resultType="String" order="BEFORE">
+			SELECT 'PRWK' || LPAD(NVL(MAX(SUBSTR(WORK_ID,5,5)),0)+1,5,'0') FROM PROJ_WORK
+		</selectKey>
+		INSERT INTO PROJ_WORK (
+		    WORK_ID
+		   ,PROJ_ID
+		   ,WORK_RQSTR
+		   ,WORK_STRT_DT
+		   ,WORK_END_DT
+		   ,WORK_PROGRESS
+		   ,WORK_STATE
+		   ,WORK_PRIORITY
+		   ,WORK_LEVEL
+		   ,WORK_WRT_DT
+		   ,WORK_MDFY_DT
+		   ,WORK_TITLE
+		   ,WORK_CNTNT
+		) VALUES (
+		    #{workId}
+		   ,#{projId}
+		   ,#{workRqstr}
+		   ,#{workStrtDt}
+		   ,#{workEndDt}
+		   ,#{workProgress}
+		   ,#{workState}
+		   ,#{workPriority}
+		   ,#{workLevel}
+		   ,SYSDATE
+		   ,SYSDATE
+		   ,#{workTitle}
+		   ,#{workCntnt}
+		)
+	</insert>
+	
+	<!-- 업무 담당자를 추가함 -->
+	<insert id="insertMngr" parameterType="workMngrVO">
+		<foreach collection="list" item="item" index="index" 
+				open="INSERT ALL " separator=" " close="SELECT * FROM DUAL">
+			INTO WORK_MNGR (
+			    WORK_ID
+			   ,WORK_MNGR_ID
+			) VALUES (
+			    #{item.workId}
+			   ,#{item.workMngrId}
+			)
+		</foreach>
+	</insert>
+	
+	<!-- 업무 리스트를 가져옴 -->
+	<select id="workList" parameterType="hashMap" resultMap="workMap">
+		SELECT
+		    W.WORK_ID
+		   ,W.PROJ_ID
+		   ,M.EMP_NAME
+		   ,(SELECT EMP_NAME FROM EMPLOYEE WHERE EMP_ID = W.WORK_RQSTR) AS WORK_RQSTR
+		   ,W.WORK_STRT_DT 
+		   ,W.WORK_END_DT
+		   ,W.WORK_PROGRESS
+		   ,W.WORK_STATE
+		   ,W.WORK_PRIORITY
+		   ,W.WORK_MDFY_DT
+		   ,W.WORK_TITLE
+		   ,W.WORK_CNTNT
+		FROM
+		    PROJ_WORK W LEFT OUTER JOIN (SELECT E.EMP_NAME, W.WORK_ID, W.WORK_MNGR_ID FROM WORK_MNGR W, EMPLOYEE E WHERE W.WORK_MNGR_ID = E.EMP_ID ) M
+		    ON (W.WORK_ID = M.WORK_ID )    
+		WHERE W.PROJ_ID = #{projId}
+		<if test="division == 'give'">
+		AND W.WORK_RQSTR= #{empId}
+		</if>
+		<if test="division == 'get'">
+		AND W.WORK_ID IN (SELECT work_id FROM WORK_MNGR WHERE WORK_MNGR_ID = #{empId})
+		</if>
+		<if test="wkStateList != null">
+        AND W.WORK_STATE IN 
+        	<foreach collection="wkStateList" item="arr" open="(" close=")" separator=",">
+			 #{arr}
+			</foreach>
+		</if>
+		<if test="priorityList != null">
+		AND W.WORK_PRIORITY IN 
+        	<foreach collection="priorityList" item="arr" open="(" close=")" separator=",">
+			 #{arr}
+			</foreach>
+		</if>
+		AND W.WORK_DEL_DT IS NULL
+
+	</select>
+	
+	<!-- 홈 업무 리스트를 가져옴 -->
+	<select id="workHomeList" parameterType="hashMap" resultMap="workMap">
+		SELECT
+		    W.WORK_ID
+		   ,W.PROJ_ID
+		   ,M.EMP_NAME
+		   ,W.WORK_STRT_DT 
+		   ,W.WORK_END_DT
+		   ,W.WORK_PROGRESS
+		   ,W.WORK_STATE
+		   ,W.WORK_PRIORITY
+		   ,W.WORK_MDFY_DT
+		   ,W.WORK_TITLE
+		   ,W.WORK_CNTNT
+		FROM
+		    PROJ_WORK W LEFT OUTER JOIN (SELECT E.EMP_NAME, W.WORK_ID, W.WORK_MNGR_ID FROM WORK_MNGR W, EMPLOYEE E WHERE W.WORK_MNGR_ID = E.EMP_ID ) M
+		    ON (W.WORK_ID = M.WORK_ID )    
+		WHERE 1 = 1
+		<if test="division == 'give'">
+		AND W.WORK_RQSTR= #{empId}
+		</if>
+		<if test="division == 'get'">
+		AND W.WORK_ID IN (SELECT work_id FROM WORK_MNGR WHERE WORK_MNGR_ID = #{empId})
+		</if>
+		<if test="issue != null">
+        AND W.WORK_STATE = '이슈'
+		</if>
+
+		AND W.WORK_DEL_DT IS NULL
+
+	</select>
+	
+	<select id="worktDetail" parameterType="String" resultMap="workMap">
+		SELECT
+		    W.WORK_ID
+		   ,W.PROJ_ID
+		   ,W.WORK_RQSTR
+		   ,M.EMP_NAME
+		   ,W.WORK_STRT_DT
+		   ,W.WORK_END_DT
+		   ,W.WORK_REND_DT
+		   ,W.WORK_PROGRESS
+		   ,W.WORK_STATE
+		   ,W.WORK_PRIORITY
+		   ,W.TOP_WORK_ID
+		   ,W.WORK_LEVEL
+		   ,W.WORK_MDFY_DT
+		   ,W.WORK_DEL_DT
+		   ,W.WORK_TITLE
+		   ,W.WORK_CNTNT
+		FROM
+		    PROJ_WORK W LEFT OUTER JOIN (SELECT E.EMP_NAME, W.WORK_ID, W.WORK_MNGR_ID FROM WORK_MNGR W, EMPLOYEE E WHERE W.WORK_MNGR_ID = E.EMP_ID ) M
+		    ON (W.WORK_ID = M.WORK_ID )  
+		WHERE 
+		    W.WORK_ID = #{workId}
+	</select>
+	
+	<!-- 업무 수정 -->
+	<update id="updateWork" parameterType="projWorkVO">
+		UPDATE 
+			PROJ_WORK
+		SET 
+		    WORK_STRT_DT = #{workStrtDt}
+		  , WORK_END_DT = #{workEndDt}
+		  , WORK_PROGRESS = #{workProgress}
+		  , WORK_STATE = #{workState}
+		  , WORK_PRIORITY = #{workPriority}
+		  , WORK_MDFY_DT = #{workMdfyDt}
+		  , WORK_TITLE = #{workTitle}
+		  , WORK_CNTNT = #{workCntnt}
+		WHERE
+		    WORK_ID = #{workId}
+	</update>
+	
+	<!-- 업무 담당자 수정 -->
+	<update id="updateMngr">
+		<foreach collection="list" item="item" index="index" >
+			UPDATE 
+			    WORK_MNGR
+			SET
+			    WORK_MNGR_ID = #{item.workMngrId}
+			WHERE
+			    WORK_ID = #{item.workId}
+		</foreach>
+	</update>
+	
+	<!-- 업무 삭제 -->
+	<update id="deleteWork">
+		UPDATE 
+			    PROJ_WORK
+		SET
+			    WORK_DEL_DT = SYSDATE
+		WHERE
+			    WORK_ID = #{workId}
+	</update>
+	
+	<!-- 업무 댓글 등록 -->
+	<insert id="insertRpl" parameterType="projWorkReplyVO">
+	INSERT INTO proj_work_reply (
+		<selectKey keyProperty="workReplyId" resultType="int" order="BEFORE">
+			SELECT NVL(MAX(work_reply_id),0)+1 FROM proj_work_reply
+		</selectKey>
+	    work_reply_id
+	   ,top_work_rply_id
+	   ,work_rply_level
+	   ,work_id
+	   ,work_rply_cntnt
+	   ,work_rply_wrtr
+	   ,work_rply_wrt_dt
+	   ,work_rply_mdfy_dt
+	   ,proj_id
+	) VALUES (
+	    #{workReplyId}
+	   ,#{topWorkRplyId}
+	   ,#{workRplyLevel}
+	   ,#{workId}
+	   ,#{workRplyCntnt}
+	   ,#{workRplyWrtr}
+	   ,SYSDATE
+	   ,SYSDATE
+	   ,#{projId}
+	)
+	</insert>
+	
+	<!-- 업무 댓글 리스트 -->
+	<select id="rplList" parameterType="String" resultType="projWorkReplyVO">
+		SELECT
+		    WORK_REPLY_ID
+		   ,TOP_WORK_RPLY_ID
+		   ,WORK_RPLY_LEVEL
+		   ,WORK_ID
+		   ,WORK_RPLY_CNTNT
+		   ,WORK_RPLY_WRTR
+		   ,(SELECT EMP_NAME FROM EMPLOYEE WHERE EMP_ID = WORK_RPLY_WRTR) AS EMP_NAME
+		   ,WORK_RPLY_WRT_DT
+		   ,WORK_RPLY_MDFY_DT
+		   ,WORK_RPLY_DEL_DT
+		   ,PROJ_ID
+		FROM
+		    PROJ_WORK_REPLY
+		WHERE 
+			WORK_ID = #{workId}
+		AND 
+			WORK_RPLY_DEL_DT IS NULL
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

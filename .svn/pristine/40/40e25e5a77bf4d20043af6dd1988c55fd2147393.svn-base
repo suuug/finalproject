@@ -1,0 +1,190 @@
+package kr.or.workTogether.qna.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import kr.or.workTogether.common.util.ArticlePage;
+import kr.or.workTogether.common.vo.BoardVO;
+import kr.or.workTogether.qna.service.QnaService;
+
+@RequestMapping("/qna")
+@Controller
+public class QnaController {
+
+	private static final Logger logger = LoggerFactory.getLogger(QnaController.class);
+
+	@Autowired
+	QnaService qnaService;
+
+	// Model에 데이터, 주소, 파일명 등을 담아서 view 로 보내기 위해서
+	// 목록 및 페이징
+	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	public String list(Model model, @RequestParam(defaultValue = "1") int currentPage,
+			@RequestParam(defaultValue = "5", required = false) int size,
+			@RequestParam(required = false) String keyWord) {
+
+		System.out.println(currentPage);
+//		Map<String, String> pageHeader = new HashMap<String, String>();
+//		pageHeader.put("subtitle", "Customer");
+//		pageHeader.put("title", "고객 목록");
+//		model.addAttribute("pageHeader", pageHeader);
+
+		int start = currentPage * size - (size - 1);
+		int end = currentPage * size;
+
+		// <key,value>
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("currentPage", currentPage);
+		map.put("size", size);
+		map.put("start", start);
+		map.put("end", end);
+		map.put("keyWord", keyWord);
+
+		List<BoardVO> list = this.qnaService.list(map);
+
+		// 상품분류 별 거래처 목록 행의 수
+		int total = this.qnaService.listCount(map);
+
+		model.addAttribute("list", list);
+		model.addAttribute("page", new ArticlePage(total, currentPage, size, 5, start, end));
+		model.addAttribute("total", total);
+
+		// forwarding
+		return "qna/list";
+	}
+
+	@GetMapping("/detail")
+	public String detail(@RequestParam String brdId, Model model, @RequestParam int currentPage) {
+		qnaService.updateViewCnt(brdId);
+		
+		BoardVO boardVO = this.qnaService.detail(brdId);
+
+//		for (BoardVO boardVO : list) {
+		model.addAttribute("boardVO", boardVO);
+		model.addAttribute("currentPage", currentPage);
+//		}
+
+		// 조회수 증가. 기존의 게시글 자세히 보기에서 추가
+
+		return "qna/detail";
+	}
+
+	@GetMapping("/insert") // url 주소
+	public String insert(Model model) {
+		model.addAttribute("boardVO", new BoardVO());
+		return "qna/insert";
+	}
+
+	@PostMapping("/insert")
+	public String insertPost(@Validated BoardVO boardVO, BindingResult result) {
+
+		// 검증 오류 발생
+		if (result.hasErrors()) {
+			List<ObjectError> allErrors = result.getAllErrors();
+			List<ObjectError> globalErrors = result.getGlobalErrors();
+			List<FieldError> fieldErrors = result.getFieldErrors();
+			// validation 중에 어떤 오류가 나왔는지 확인..
+			for (int i = 0; i < allErrors.size(); i++) {
+				ObjectError objectError = allErrors.get(i);
+				logger.info("objectError : " + objectError);
+			}
+
+			for (ObjectError objectError : globalErrors) {
+				logger.info("objectError : " + objectError);
+			}
+
+			for (FieldError fieldError : fieldErrors) {
+				logger.info("fieldError : " + fieldError.getDefaultMessage());
+			}
+
+			// redirect(X) => 데이터를 보낼 수 없음
+			// forwarding(o)
+			return "qna/insert";
+		}
+
+		// insert처리
+		logger.info("boardVO : " + boardVO.toString());
+
+		int insertResult = qnaService.insert(boardVO);
+		logger.info("board insertResult : " + insertResult);
+
+		if (insertResult > 0) {// 등록 성공
+			// 목록으로 이동
+			return "redirect:/qna/list";
+		} else {// 등록 실패
+				// 등록 화면으로 forwarding
+			return "qna/insert";
+		}
+
+	}
+
+	@GetMapping(value = "/update")
+	public String update(Model model, @RequestParam String brdId) {
+		// 수정form에 들어가 데이터 가져오기
+		BoardVO boardVO = this.qnaService.detail(brdId);
+
+		model.addAttribute("boardVO", boardVO);
+
+		return "qna/update";
+	}
+
+	@PostMapping(value = "/update")
+	public String updatePost(@Validated BoardVO boardVO, BindingResult result) {
+
+		// 검증 오류 발생
+		if (result.hasErrors()) {
+			List<ObjectError> allErrors = result.getAllErrors();
+			List<ObjectError> globalErrors = result.getGlobalErrors();
+			List<FieldError> fieldErrors = result.getFieldErrors();
+			// validation 중에 어떤 오류가 나왔는지 확인..
+			for (int i = 0; i < allErrors.size(); i++) {
+				ObjectError objectError = allErrors.get(i);
+				logger.info("objectError : " + objectError);
+			}
+
+			for (ObjectError objectError : globalErrors) {
+				logger.info("objectError : " + objectError);
+			}
+
+			for (FieldError fieldError : fieldErrors) {
+				logger.info("fieldError : " + fieldError.getDefaultMessage());
+			}
+
+			// redirect(X) => 데이터를 보낼 수 없음
+			// forwarding(o)
+			return "qna/update";
+		}
+
+		// insert처리
+		logger.info("boardVO : " + boardVO.toString());
+
+		int updateResult = qnaService.update(boardVO);
+		logger.info("board insertResult : " + updateResult);
+
+		if (updateResult > 0) {// 등록 성공
+			// 목록으로 이동
+			return "redirect:/qna/list";
+		} else {// 등록 실패
+				// 등록 화면으로 forwarding
+			return "qna/update";
+		}
+
+	}
+
+}

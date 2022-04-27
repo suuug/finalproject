@@ -1,0 +1,30 @@
+package kr.or.workTogether.attendance.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@RequestMapping("/attendance")
+@Controller
+public class AttendanceController {
+
+	@RequestMapping("/state")
+	public String state() {
+		return "attendance/state";
+	}
+	
+	@RequestMapping("/apply")
+	public String apply() {
+		return "attendance/apply";
+	}
+	
+	@RequestMapping("/stateMem")
+	public String stateMem() {
+		return "attendance/stateMem";
+	}
+	
+	@RequestMapping("/applyMem")
+	public String applyMem() {
+		return "attendance/applyMem";
+	}
+	
+}

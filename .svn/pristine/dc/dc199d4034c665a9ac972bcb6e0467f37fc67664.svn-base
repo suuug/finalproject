@@ -1,0 +1,190 @@
+package kr.or.workTogether.authorization.controller;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.workTogether.authorization.service.AuthorizationService;
+import kr.or.workTogether.common.vo.AtrzDocVO;
+import kr.or.workTogether.common.vo.AtrzLineDetailVO;
+import kr.or.workTogether.common.vo.AtrzLineVO;
+import kr.or.workTogether.common.vo.CommonCodeVO;
+import kr.or.workTogether.common.vo.DepartmentVO;
+import kr.or.workTogether.common.vo.EmployeeVO;
+import kr.or.workTogether.security.CustomUser;
+
+@RequestMapping("/autho")
+@Controller
+public class AuthorizationController {
+	private static final Logger logger = LoggerFactory.getLogger(AuthorizationController.class);
+
+	@Autowired
+	private AuthorizationService authoService;
+	
+	//전자결재 - 메인페이지(PAGE)
+	@GetMapping("/main")
+	public String mainPage(Model model) {
+		return "autho/main";
+	}
+	
+	//전자결재 - 작성하기(PAGE)
+	@GetMapping("/create")
+	public String createPage(Model model, @ModelAttribute AtrzDocVO atrzDocVO) {
+		//문서양식 리스트
+		List<CommonCodeVO> docFormList = authoService.getDocFormList();
+		Map<String, Object> docFormMap = new HashMap<String, Object>();
+		Map<String, Object> docContentMap = new HashMap<String, Object>();
+		
+		for(CommonCodeVO vo : docFormList) {
+			docFormMap.put(vo.getCmmnId(), vo.getCmmnGroupName());
+			docContentMap.put(vo.getCmmnId(), vo.getCmmnClob());
+		}
+		model.addAttribute("docForm", docFormMap);
+		model.addAttribute("docContent", docContentMap);
+		
+		//보존연한 리스트
+		List<CommonCodeVO> docRetentionList = authoService.getDocRetentionList();
+		Map<String, Object> docRetentionMap = new HashMap<String, Object>();
+		for(CommonCodeVO vo : docRetentionList) {
+			docRetentionMap.put(vo.getCmmnId(), vo.getCmmnGroupName());
+		}
+		model.addAttribute("docRetention", docRetentionMap);
+		
+		
+		List<DepartmentVO> tList = authoService.getTreeList();
+		model.addAttribute("tList",tList);
+		//logger.info("tList : "+tList);
+		
+		return "autho/create";
+	}
+	
+	//전자결재 - 작성하기(CREATE)
+	@PostMapping("/create")
+	public String create(Model model, @ModelAttribute AtrzDocVO atrzDocVO, @RequestParam String atrzAprv, @RequestParam String atrzLineDetailId) throws IOException {
+		//결재선(Name) 처리
+		atrzAprv = atrzAprv.replaceAll(",,", ",").replaceAll(",,",",");
+		if(atrzAprv.lastIndexOf(",")==atrzAprv.length()-1) {
+			atrzAprv = atrzAprv.substring(0,atrzAprv.length()-1);
+		}
+		String[] atrzLineDetailNameList = atrzAprv.split(",");
+		
+		//결재선(Id) 처리
+		atrzLineDetailId = atrzLineDetailId.replaceAll(",,", ",").replaceAll(",,",",");
+		if(atrzLineDetailId.lastIndexOf(",")==atrzLineDetailId.length()-1) {
+			atrzLineDetailId = atrzLineDetailId.substring(0,atrzLineDetailId.length()-1);
+		}
+		String[] atrzLineDetailIdList  = atrzLineDetailId.split(",");
+		
+		//결재문서(AtrzDoc) 등록
+		atrzDocVO.setAtrzLineStr(atrzAprv);
+		int result = authoService.insertAtrzDoc(atrzDocVO);
+		
+		//결재선(AtrzDocLine) 등록
+		AtrzLineVO atrzLineVO = new AtrzLineVO();
+		atrzLineVO.setAtrzLineName("결재선명");
+		atrzLineVO.setAtrzAprvId(atrzDocVO.getDocWrtr());
+		atrzLineVO.setAtrzLineStr(atrzDocVO.getAtrzLineStr());
+		String atrzLineId = authoService.insertAtrzLine(atrzLineVO);
+		
+		//결재선상세(AtrzDocLineDetail) 등록
+		for(int i=0; i<atrzLineDetailNameList.length; i++) {
+			AtrzLineDetailVO atrzLineDetailVO = new AtrzLineDetailVO();
+			atrzLineDetailVO.setAtrzLineId(atrzLineId);
+			atrzLineDetailVO.setAtrzLineLevel((i+1));
+			atrzLineDetailVO.setAtrzAprvId(atrzLineDetailIdList[i]);
+			atrzLineDetailVO.setAtrzName(atrzLineDetailNameList[i]);
+			int result3 = authoService.insertAtrzLineDetail(atrzLineDetailVO);
+		}
+		
+		return "redirect:/autho/create";
+	}
+	
+	//조직도(LIST)
+	@ResponseBody
+	@GetMapping("/treeList")
+	public List<DepartmentVO> treeListGet(Model model, @ModelAttribute DepartmentVO departVO){
+		List<DepartmentVO> treeList = authoService.getTreeList();
+		//model.addAttribute("treeList", treeList);
+		
+		return treeList;
+	}
+
+	
+	//전자결재 - 임시문서(PAGE)
+	@GetMapping("/tempDoc")
+	public String tempDoc(Model model, Authentication auth) {
+		CustomUser user = (CustomUser) auth.getPrincipal();
+		EmployeeVO userInfo = user.getUser();
+		
+		String docWrtr = userInfo.getUsername();
+		List<AtrzDocVO> atrzDocList = authoService.getTempDocList(docWrtr);
+		logger.info("임시문서(LIST) : "+atrzDocList);
+		
+		model.addAttribute("atrzDocList", atrzDocList);
+		
+		return "autho/tempDoc";
+	}
+	
+	//전자결재 - 임시문서(DETAIL-PAGE)
+	@GetMapping("/tempDocDetail")
+	public String tempDocDetail(Model model, @ModelAttribute AtrzDocVO atrzDocVO, @RequestParam String docId) {
+		//임시문서(ONE)
+		atrzDocVO = authoService.getTempDoc(docId);
+		model.addAttribute("atrzDocVO", atrzDocVO);
+		
+		
+		return "autho/tempDocDetail";
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//전자결재 - 받은 결재함(page)
+	@GetMapping("/receiveDoc")
+	public String receiveDoc(Model model) {
+		return "autho/receiveDoc";
+	}
+	
+	//전자결재 - 보낸 결재함(page)
+	@GetMapping("/sendDoc")
+	public String sendDoc(Model model) {
+		return "autho/sendDoc";
+	}
+	
+	//전자결재 - 전자결재 설정(page)
+	@GetMapping("/setting")
+	public String setting(Model model) {
+		return "autho/setting";
+	}
+	
+}
+
+
+
+
+
+
+
+

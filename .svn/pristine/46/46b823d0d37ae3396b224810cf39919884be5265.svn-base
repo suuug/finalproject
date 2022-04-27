@@ -1,0 +1,5 @@
+package kr.or.workTogether.common.util;
+
+public class FileDownload {
+
+}

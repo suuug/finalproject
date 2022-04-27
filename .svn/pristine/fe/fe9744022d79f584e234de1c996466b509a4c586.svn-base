@@ -1,0 +1,40 @@
+package kr.or.workTogether.authorization.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.workTogether.common.vo.AtrzDocVO;
+import kr.or.workTogether.common.vo.AtrzLineDetailVO;
+import kr.or.workTogether.common.vo.AtrzLineVO;
+import kr.or.workTogether.common.vo.CommonCodeVO;
+import kr.or.workTogether.common.vo.DepartmentVO;
+
+@Mapper
+public interface AuthorizationMapper {
+	
+	//조직도(List)
+	public List<DepartmentVO> getTreeList();
+	
+	//문서양식(LIST)
+	public List<CommonCodeVO> getDocFormList();
+	
+	//보존연한(LIST)
+	public List<CommonCodeVO> getDocRetentionList();
+	
+	//결재문서(ISNERT)
+	public int insertAtrzDoc(AtrzDocVO atrzDocVO);
+	
+	//결재선(INSERT)
+	public int insertAtrzLine(AtrzLineVO atrzLineVO);
+	
+	//결재선상세(INSERT)
+	public int insertAtrzLineDetail(AtrzLineDetailVO atrzLineDetailVO);
+	
+	//임시문서함(LIST)
+	public List<AtrzDocVO> getTempDocList(String docWrtr);
+	
+	//임시문서(DETAIL)
+	public AtrzDocVO getTempDoc(String docId);
+	
+}

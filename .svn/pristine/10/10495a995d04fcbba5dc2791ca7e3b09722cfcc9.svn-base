@@ -1,0 +1,18 @@
+package kr.or.workTogether.chat.service;
+
+import java.util.List;
+
+import kr.or.workTogether.common.vo.ChatBangVO;
+import kr.or.workTogether.common.vo.ChatVO;
+
+public interface ChatService {
+	
+	// 채팅방리스트
+	public List<ChatBangVO> chatBangList(String empId);
+	
+	// 채팅방 만들기
+	public int insertChat(ChatVO chatVO);
+	
+	// 채팅내용 가져오기
+	public List<ChatVO> chatMsgList(String chatbangId);
+}

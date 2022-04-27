@@ -1,0 +1,373 @@
+package kr.or.workTogether.email.controller;
+
+import java.io.Console;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.workTogether.common.util.ArticlePage;
+import kr.or.workTogether.common.vo.EmailVO;
+import kr.or.workTogether.email.service.EmailService;
+
+@Controller
+@RequestMapping("/email")
+public class EmailController {
+
+	private static final Logger logger = LoggerFactory.getLogger(EmailController.class);
+
+	@Autowired
+	EmailService emailService;
+
+	//메일 전송하기 GET
+	@GetMapping("/sendMail")
+	public String getSendMail(@ModelAttribute EmailVO emailVO) {
+		return "email/sendMail";
+
+	}
+	
+	//메일 전송하기 POST
+	@PostMapping("/sendMail")
+	public String PostSendMail(@ModelAttribute EmailVO emailVO) {
+
+//		logger.info("emailVO: " + emailVO.toString());
+		int insertResult = 0;
+
+		if (emailVO.getEmailTypeId().equals("메일전송"))
+			insertResult = emailService.sendMail(emailVO);
+		else
+			insertResult = emailService.unsentMail(emailVO);  //임시보관하기
+
+		if (insertResult > 0)
+			return "email/main";
+		else
+			return "email/sendMail";
+	}
+
+	//보낸 메일함 조회하기
+	@RequestMapping("/sendMailBox")
+	public String sendMailBox(Model model,
+			@RequestParam(defaultValue = "1") int currentPage,
+			@RequestParam(defaultValue = "10", required = false) int size,
+			@RequestParam(required=false) String keyWord) {
+		int start = currentPage * size - (size - 1);
+		int end = currentPage * size;
+		
+		
+		// <key,value>
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("currentPage", currentPage);
+		map.put("size", size);
+		map.put("start", start);
+		map.put("end", end);
+		map.put("keyWord", keyWord);
+		
+		//emailVO
+		List<EmailVO> list = emailService.sendMailBox(map);
+		
+		// 보낸 메일함의 목록 행의 수
+		int total = this.emailService.sendListCount(map);
+
+		model.addAttribute("list", list);
+		model.addAttribute("page", new ArticlePage(total, currentPage, size, 10, start, end));
+		model.addAttribute("total", total);
+		
+		//forward
+		return "email/sendMailBox";
+	}
+	
+	//임시 보관함 조회하기
+	@RequestMapping("/unsentMailBox")
+	public String unsentMailBox(Model model,
+			@RequestParam(defaultValue = "1") int currentPage,
+			@RequestParam(defaultValue = "10", required = false) int size,
+			@RequestParam(required=false) String keyWord) {
+		int start = currentPage * size - (size - 1);
+		int end = currentPage * size;
+		
+		
+		// <key,value>
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("currentPage", currentPage);
+		map.put("size", size);
+		map.put("start", start);
+		map.put("end", end);
+		map.put("keyWord", keyWord);		
+		
+		//emailVO
+		List<EmailVO> list = emailService.unsentMailBox(map);
+		
+		int total = this.emailService.unsentListCount(map);
+		model.addAttribute("list", list);
+		model.addAttribute("page", new ArticlePage(total, currentPage, size, 10, start, end));
+		model.addAttribute("total", total);
+		//forward
+		return "email/unsentMailBox";
+	}
+	
+	//보낸 메일함 상세정보 조회하기
+	@GetMapping("/sendMailDetail")
+	public String sendMailDetail(Model model, @RequestParam String emailId) {
+		List<EmailVO> emailVO = this.emailService.sendMailDetail(emailId);
+
+		model.addAttribute("emailVO", emailVO);
+		// forward
+		return "email/sendMailDetail";
+	}
+	
+	// 임시보관함 상세정보 조회하기
+	@GetMapping("/unsentMailDetail")
+	public String unsentMailDetail(Model model, @RequestParam String emailId,@ModelAttribute EmailVO emailVO) {
+		emailVO = this.emailService.unsentMailDetail(emailId);
+
+		model.addAttribute("emailVO", emailVO);
+		return "email/unsentMailDetail";
+	}
+
+	// 보낸 메일 삭제하기
+	@RequestMapping(value="/sendMaildelete")
+	public String sendMailDel(@RequestParam String emailId) {
+		int result = this.emailService.sendMailDel(emailId);
+		if (result > 0)
+			return "redirect:/email/sendMailBox";
+		else
+			return "email/errorMessage";
+	}
+
+	// 임시보관 메일 삭제하기
+	@RequestMapping("/unsentMailDel")
+	public String unsentMailDel(@RequestParam String emailId) {
+		int result = this.emailService.unsentMailDel(emailId);
+		if (result > 0)
+			return "redirect:/email/unsentMailBox";
+		else
+			return "email/errorMessage";
+	}
+	
+	//임시보관 메일을 전송완료시키기
+	@PostMapping("/unsentMailSend")
+	public String unsentMailSend(@ModelAttribute EmailVO emailVO) {
+		int result =emailService.unsentMailSend(emailVO);
+		System.out.println(emailVO);
+		if(result>0)
+			return "redirect:/email/unsentMailBox";
+		else
+			return "email/errorMessage";
+	}
+	
+	//휴지통 목록 출력하기
+	@RequestMapping("/trashMailBox")
+	public String trashMailBox(Model model,
+			@RequestParam(defaultValue = "1") int currentPage,
+			@RequestParam(defaultValue = "10", required = false) int size,
+			@RequestParam(required=false) String keyWord) {
+		int start = currentPage * size - (size - 1);
+		int end = currentPage * size;
+		
+		// <key,value>
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("currentPage", currentPage);
+		map.put("size", size);
+		map.put("start", start);
+		map.put("end", end);
+		map.put("keyWord", keyWord);		
+		
+		//emailVO
+		List<EmailVO> list = emailService.trashMailBox(map);
+		
+		int total = this.emailService.trashListCount(map);
+		
+		model.addAttribute("list", list);
+		model.addAttribute("page", new ArticlePage(total, currentPage, size, 10, start, end));
+		model.addAttribute("total", total);
+		
+		//forward
+		return "email/trashMailBox";
+	}
+	
+	//휴지통 비우기 => 테이블 내 전체 삭제해버리기 
+	@GetMapping("/deleteAll")
+	public String deleteAll() {
+		int result=this.emailService.deleteAll();
+		if(result>0)
+			return "redirect:/email/trashMailBox";
+		else
+			return "email/errorMessage";
+	}
+	
+	//선택한 메일 복구하기 
+	@ResponseBody
+	@GetMapping("/restoreMail")
+	public String restoreMail(@RequestParam(value = "resMailArr[]") List<String> resMailArr) {
+
+		logger.info("list ==> " + resMailArr);
+
+		int result = 0;
+		for (String emailId : resMailArr) {
+			result += this.emailService.restoreMail(emailId);
+		}
+
+		if (result == resMailArr.size()) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	//체크박스 선택한 메일 삭제하기 (휴지통영구삭제)
+	@ResponseBody
+	@GetMapping("/deletechoice")
+	public String deletechoice(@RequestParam(value="delMailArr[]")List<String> delMailArr) {
+		int result=0;
+		for (String emailId : delMailArr) {
+			result+=this.emailService.deletechoice(emailId);
+		}
+		if(result == delMailArr.size()) {
+			return "success";
+		}else {
+			return "fail";
+		}
+	}
+	
+	//체크박스로 선택한 메일만 삭제되도록 하기 (보낸메일함)
+	@ResponseBody
+	@GetMapping("/deletesendChoice")
+	public String deletesendChoice(@RequestParam(value="delSendArr[]")List<String> delSendArr) {
+		int result=0;
+		for(String emailId : delSendArr) {
+			result+=this.emailService.deletesendChoice(emailId);
+		}
+		if(result==delSendArr.size()) {
+			return "success";
+		}else {
+			return "fail";
+		}
+	}
+	
+	//체크박스로 선택한 메일만 삭제되도록 하기 (임시보관함)
+	@ResponseBody
+	@GetMapping("/deleteunsentChoice")
+	public String deleteunsentChoice(@RequestParam(value="delUnsentArr[]")List<String> delUnsentArr) {
+		int result=0;
+		for(String emailId :delUnsentArr ) {
+			result+=this.emailService.deleteunsentChoice(emailId);
+		}
+		if(result==delUnsentArr.size()) {
+			return "success";
+		}else {
+			return "fail";
+		}
+	}
+	
+	//받은 메일함 출력하기
+	//보낸 메일함 조회하기
+	@RequestMapping("/reMailBox")
+	public String reMailBox(Model model,
+			@RequestParam(defaultValue = "1") int currentPage,
+			@RequestParam(defaultValue = "10", required = false) int size,
+			@RequestParam(required=false) String keyWord) {
+		int start = currentPage * size - (size - 1);
+		int end = currentPage * size;
+		
+		
+		// <key,value>
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("currentPage", currentPage);
+		map.put("size", size);
+		map.put("start", start);
+		map.put("end", end);
+		map.put("keyWord", keyWord);
+		
+		//emailVO
+		List<EmailVO> list = emailService.reMailBox(map);
+		
+		// 보낸 메일함의 목록 행의 수
+		int total = this.emailService.reListCount(map);
+
+		model.addAttribute("list", list);
+		model.addAttribute("page", new ArticlePage(total, currentPage, size, 10, start, end));
+		model.addAttribute("total", total);
+		
+		//forward
+		return "email/reMailBox";
+	}
+	
+	
+	//체크박스로 선택한 메일만 삭제되도록 하기 (임시보관함)
+	@ResponseBody
+	@GetMapping("/deletereChoice")
+	public String deletereChoice(@RequestParam(value="delreArr[]")List<String> delreArr) {
+		int result=0;
+		for(String emailId :delreArr ) {
+			result+=this.emailService.deletereChoice(emailId);
+		}
+		if(result==delreArr.size()) {
+			return "success";
+		}else {
+			return "fail";
+		}
+	}
+	
+	// 받은메일함 상세정보 조회하기
+	@GetMapping("/reMailDetail")
+	public String reMailDetail(Model model, @RequestParam String emailId) {
+		List<EmailVO> emailVO = this.emailService.reMailDetail(emailId);
+
+		model.addAttribute("emailVO", emailVO);
+		return "email/reMailDetail";
+	}
+	
+	// 받은 메일 삭제하기
+	@RequestMapping(value="/reMaildelete")
+	public String reMailDel(@RequestParam String emailId) {
+		int result = this.emailService.reMailDel(emailId);
+		if (result > 0)
+			return "redirect:/email/reMailBox";
+		else
+			return "email/errorMessage";
+	}
+	
+	//받은메일 답장하기 GET
+	@GetMapping("/resendNow")
+	public String resendNow( Model model, @RequestParam String emailId, @ModelAttribute EmailVO emailVO) {
+		List<EmailVO> emaillistVO = this.emailService.reMailDetail(emailId);
+		model.addAttribute("emaillistVO", emaillistVO);
+//		logger.info("emaillistVO: " + emaillistVO.toString());
+		return "email/resendNow";
+
+	}
+	
+	//받은메일 답장하기 POST
+	@PostMapping("/resendNow")
+	public String PostresendNow( @ModelAttribute EmailVO emailVO) {
+//		model.addAttribute("emailVO",emailVO);
+		logger.info("emailVO: " + emailVO.toString());
+		int insertResult = 0;
+
+		if (emailVO.getEmailTypeId().equals("메일전송"))
+			insertResult = emailService.sendMail(emailVO);
+		else
+			insertResult = emailService.unsentMail(emailVO);  //임시보관하기
+
+		if (insertResult > 0)
+			return "email/main";
+		else
+			return "email/resendNow";
+	}
+}

@@ -1,0 +1,26 @@
+package kr.or.workTogether.common.vo;
+
+public class WorkMngrVO {
+	
+	private String workId;
+	private String workMngrId;
+	public String getWorkId() {
+		return workId;
+	}
+	public void setWorkId(String workId) {
+		this.workId = workId;
+	}
+	public String getWorkMnrgID() {
+		return workMngrId;
+	}
+	public void setWorkMnrgID(String workMnrgID) {
+		this.workMngrId = workMnrgID;
+	}
+	@Override
+	public String toString() {
+		return "WorkMngrVO [workId=" + workId + ", workMngrId=" + workMngrId + "]";
+	}
+	
+	
+	
+}

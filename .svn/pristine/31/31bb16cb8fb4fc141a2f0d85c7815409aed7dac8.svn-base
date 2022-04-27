@@ -1,0 +1,273 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+
+<link href="/resources/css/bstreeview.min.css" id="app-style" rel="stylesheet" type="text/css" />
+<script src="/resources/js/bstreeview.min.js"></script>
+
+<style>
+#j-card{
+	padding: 30px;
+}
+#j-table{
+	border-color: black;
+	border-style: dashed;
+}
+#j-table tr td{
+	width: 20px;
+}
+.j-td{
+	height: 100px;
+}
+.j-input-text{
+	width: 100%;
+	height: 100%;
+	background: #e8edf2;
+	border: 0px solid #e8edf2;
+}
+.cke_contents{
+	min-height:600px;
+}
+.modal-dialog{
+	min-width: 700px;
+}
+</style>
+
+
+<div class="card overflow-hidden card-h-100 ">
+	<div class="card-body" id="j-card">
+		<div class="row mb-3">
+			<h4 class="card-title">작성하기</h4>
+		</div>
+		<form:form id="j-form" modelAttribute="atrzDocVO" method="post" action="/autho/create">
+			<div class="row gx-10 mb-3">
+				<div class="col-md-2">
+					<div class="mb-3">
+						<label for="docTypeId" class="form-label">문서종류</label>
+						<form:select path="docTypeId" class="form-select" onchange="f_selectChange(this.value)">
+							<option value="">선택</option>
+							<form:option value="A101" label="기안서"/>
+							<form:option value="A102" label="품의서"/>
+							<form:option value="A103" label="지출결의서"/>
+							<form:option value="A104" label="회의록"/>
+							
+<%-- 							<form:options items="${docForm}" /> --%>
+						</form:select>
+					</div>
+				</div>
+				<div class="col-md-2">
+					<div class="mb-3">
+						<label for="docRetention" class="form-label">보존연한</label> 
+						<form:select path="docRetention" class="form-select">
+							<option value="">선택</option>
+							<form:option value="A401" label="1년"/>
+							<form:option value="A402" label="3년"/>
+							<form:option value="A403" label="5년"/>
+							<form:option value="A404" label="10년"/>
+							<form:option value="A405" label="영구"/>
+<%-- 							<form:options items="${docRetention}"/> --%>
+						</form:select>
+					</div>
+				</div>
+	            <p id="empName" style="display:none"><sec:authentication property='principal.user.empName'/></p>
+				<div class="col-md-2">
+					<div class="mb-3">
+						<label for="docWrtrName" class="form-label">작성자</label> 
+						<form:input path="docWrtrName" class="form-control" value=""/>
+					</div>
+				</div>
+				<script>
+				  document.getElementById("docWrtrName").value = document.getElementById("empName").innerHTML;
+				</script>
+	           
+	            <p id="deptName" style="display:none"><sec:authentication property='principal.user.deptName'/></p>
+				<div class="col-md-2">
+					<div class="mb-3">
+						<label for="docDeptName" class="form-label">부서명</label> 
+						<form:input path="docDeptName" class="form-control" value=""/>
+					</div>
+				</div>
+				<script>
+				  document.getElementById("docDeptName").value = document.getElementById("deptName").innerHTML;
+				</script>
+				
+			</div>
+		
+
+
+			<div class="row mb-0">
+				<div class="col-sm-12">
+					<label class="form-label">결재선등록</label>
+					<label class="form-label mx-3">
+						<button type="button" class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#myModal">등록하기</button>
+					</label>
+				</div>
+			</div>
+			
+			<div class="row mb-4">
+				<div class="col-sm-12">
+				<table class="table mb-0 table-bordered border-primary align-middle text-center" id="j-table">
+	                <tr>
+	                    <td style="width:10%;" rowspan="3" class="col-md-1 table-primary">결재</td>
+	                    <td class="table-secondary">
+	                    	<input type="text" value="대리" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input type="text" value="차장" class="j-input-text">	
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input type="text" value="부장" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input type="text" value="사장" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input type="text" value="이사" class="j-input-text">
+	                    </td>
+	                </tr>
+	                <tr>
+	                    <td class="j-td"></td>
+	                    <td></td>
+	                    <td></td>
+	                    <td></td>
+	                    <td></td>
+	                </tr>
+	                <tr>
+	                    <td class="table-secondary">
+	                    	<input name="atrzAprv" type="text" value="이대리" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input name="atrzAprv" type="text" value="강차장" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input name="atrzAprv" type="text" value="조부장" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input name="atrzAprv" type="text" value="허사장" class="j-input-text">
+	                    </td>
+	                    <td class="table-secondary">
+	                    	<input name="atrzAprv" type="text" value="손이사" class="j-input-text">
+	                    </td>
+	                </tr>
+		        </table>
+		        </div>
+	        </div>
+			
+			<p id="secEmpId" style="display:none"><sec:authentication property='principal.user.username'/></p>
+	      	<form:hidden path="docWrtr" value="" required=""/>
+			<script>
+			   document.getElementById("docWrtr").value = document.getElementById("secEmpId").innerHTML;
+			</script>
+			
+			<div class="row mb-3">
+				<div class="col-sm-1">
+					<label for="docTitle" class="col-form-label">제목</label>
+				</div>
+				<div class="col-sm-11">
+					<form:input path="docTitle" class="form-control" />
+				</div>
+			</div>
+	
+			
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+			<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+			<!-- 플러그인 참조 -->
+			<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.js"></script>
+			<script src="http://cdn.ckeditor.com/4.4.7/standard/ckeditor.js"></script>
+			
+			<div class="row mb-3">
+				<div class="col-sm-12">
+					<form:textarea path="docCntnt" class="ckeditor" rows="50" ></form:textarea>				
+				</div>
+			</div>
+			
+			<script>
+				//CKEDITOR에 내용 집어넣기
+				function f_selectChange(value){
+					console.log("ㅇㅇ"+value);
+ 					if(value == 'A101'){
+						CKEDITOR.instances.docCntnt.setData('${docContent["A101"]}');
+ 					}else if(value == "A102"){
+						CKEDITOR.instances.docCntnt.setData('${docContent["A102"]}');
+ 					}else if(value == "A103"){
+						CKEDITOR.instances.docCntnt.setData('${docContent["A103"]}');
+ 					}else if(value == "A104"){
+						CKEDITOR.instances.docCntnt.setData('${docContent["A104"]}');
+ 					}
+				}
+				
+				//CKEDITOR의 내용 가져오기
+ 				//CKEDITOR.instances.textarea_id.getData()
+ 					$(function(){
+				$("#docWrtrName").prop("readonly",true);
+				$("#docDeptName").prop("readonly",true);
+				
+				$("#j-btn").on("click",function(){
+					var v_docTypeId = document.getElementById('docTypeId').value;
+					var v_docRetention = document.getElementById('docRetention').value;
+					
+					if(v_docTypeId == "") {
+						alert("문서종류를 선택해주세요."); 
+						return false;
+					}
+					if(v_docRetention == ""){
+						alert("보존연한을 선택해주세요.");
+						return false;
+					}
+					alert("문서 작성이 완료되었습니다.");
+					$("#j-form").submit();
+				})
+				
+			})
+			</script>
+			
+			<div class="row mb-3">
+				<div class="com-sm-12">
+					<button id="j-btn" type="button" class="btn btn-primary form-control">눌러!</button>
+				</div>
+			</div>
+			
+		</form:form>
+	</div>
+</div>
+
+<div class="row">
+		<div class="col-sm-6 col-md-4 col-xl-3">
+		
+
+			<!-- sample modal content -->
+			<div id="myModal" class="modal fade" tabindex="-1"
+				aria-labelledby="myModalLabel" style="display: none;"
+				aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="myModalLabel">결재선 등록</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<div class="row px-3">
+								<div class="col-sm-7 border border-secondary">
+									
+								</div>
+								<div class="col-sm-2 border border-secondary">화살표</div>
+								<div class="col-sm-3 border border-secondary">ss</div>
+							</div>
+						
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-light waves-effect"
+								data-bs-dismiss="modal">닫기</button>
+							<button type="button"
+								class="btn btn-primary waves-effect waves-light">저장하기</button>
+						</div>
+					</div>
+					<!-- /.modal-content -->
+				</div>
+				<!-- /.modal-dialog -->
+			</div>
+			<!-- /.modal -->
+		</div>
+	</div>

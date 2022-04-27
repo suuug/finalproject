@@ -1,0 +1,293 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+
+<script
+	src="https://cdn.ckeditor.com/ckeditor5/33.0.0/decoupled-document/ckeditor.js"></script>
+
+<style>
+</style>
+<sec:authentication property="principal.user" var="user" />
+<input type="hidden" id="userId" value="${user.username }">
+<input type="hidden" id="userPhoto" value="${user.atchPath }">
+<input type="hidden" id="token" value="${_csrf.token }">
+<input type="hidden" id="header" value="${_csrf.headerName }">
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="card">
+			<div class="card-body">
+
+				<%@ include file="includeTab.jsp"%>
+
+				<div class="row">
+
+					<div class="col-lg-2">
+						<%@ include file="includeSide.jsp"%>
+					</div>
+					<!-- col end -->
+
+					<div class="col-lg-9 ">
+						<div class="row mb-3">
+							<!-- 							<div class="col-2 alert alert-primary" role="alert"> -->
+							<!-- 								  최소 한 개  -->
+							<!-- 							</div> -->
+							<div class="col-4">
+								<form class="app-search d-none d-lg-block">
+									<div class="position-relative">
+										<input type="text" id="" class="form-control"
+											placeholder="Search..."> <span
+											class="ri-search-line"></span>
+									</div>
+								</form>
+							</div>
+							<div class="col-6">
+								<button type="button" id="insertWorkBtn"
+									class="btn btn-dark btn-rounded waves-effect waves-light">
+									업무추가</button>
+							</div>
+						</div>
+						<!-- row end -->
+
+						<div class="row">
+							<div class="table-responsive">
+								<table id="selection-datatable"
+									class="table dt-responsive nowrap w-100">
+									<thead class="table-light">
+										<tr>
+											<th>번호</th>
+											<th>상태</th>
+											<th>우선순위</th>
+											<th>업무내용</th>
+
+											<th>담당자</th>
+											<th>수정일시</th>
+										</tr>
+									</thead>
+									<tbody id="tbody">
+
+
+
+									</tbody>
+								</table>
+
+							</div>
+							<!-- end table-->
+
+						</div>
+						<!-- row end -->
+
+					</div>
+					<!-- col end -->
+
+				</div>
+				<!-- end row-->
+			</div>
+			<!-- end card body-->
+		</div>
+		<!-- end card -->
+	</div>
+</div>
+
+<!-- 	<div class="alert alert-primary alert-dismissible fade" role="alert"> -->
+<!-- 		<font style="vertical-align: inherit;"> -->
+<!-- 			<font style="vertical-align: inherit;"> -->
+<!--         	최소 한 개 이상 체크하세요! -->
+<!--         	</font> -->
+<!--         </font> -->
+<!--         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="닫기"> -->
+<!--         </button> -->
+<!--     </div> -->
+
+
+<%@ include file="modal.jsp"%>
+
+<script type="text/javascript">
+
+// ajax Post 사용시 같이 보낼 토큰헤더 
+var token = $("#token").val();
+var header = $("#header").val();
+
+	
+    $(function () {
+
+        // 	$('[data-toggle="tooltip"]').tooltip();   
+
+        
+        var userId = $("#userId").val();
+        var userPhoto = $("#userPhoto").val();
+        var projId = $("#projId").val();
+//         console.log(userId);
+//         console.log(userPhoto);
+
+        // 리스트 가져오기
+        workList();
+        
+       
+		
+		// 업무리스트
+	    function workList() {
+
+	        //		console.log($(this).val());
+	        //		division = $(this).val();`
+	        var division = $("input[name='division']:checked").val();
+	        //	 	console.log(division);
+
+	        var wkStateObj = $("input[name='wkState']:checked");
+	        //	 	console.log(wkStateObj);
+
+	        var priorityObj = $("input[name='priority']:checked");
+	        //	 	console.log(priorityObj);
+
+	        if (wkStateObj.length < 1 || priorityObj.length < 1) {
+	            alert("최소 한 개 이상 선택하세요!")
+	            event.preventDefault()
+	            return false;
+	        }
+
+	        var wkStateList = [];
+	        for (var i = 0; i < wkStateObj.length; i++) {
+	            //	 		console.log(wkStateObj[i].value);
+	            wkStateList.push(wkStateObj[i].value)
+	        }
+
+	        var priorityList = [];
+	        for (var i = 0; i < priorityObj.length; i++) {
+	            //	 		console.log(wkStateObj[i].value);
+	            priorityList.push(priorityObj[i].value)
+	        }
+
+	        $.ajax({
+	            url: "/project/workList",
+	            type: "POST",
+	            contentType: "application/json; charset=utf-8",
+	            data: JSON.stringify({
+	                'empId': userId,
+	                'projId': projId,
+	                'division': division,
+	                'wkStateList': wkStateList,
+	                'priorityList': priorityList
+	            }),
+	            success: function (res) {
+	                //					console.log(res);
+
+	                var tbody = "";
+	                $.each(res, function (i, v) {
+
+	                    //						var workId = "'" + v.workId + "'";
+	                    tbody +=
+	                        '<tr class="wkDetail" data-bs-toggle="offcanvas" data-bs-target="#wokrDetail" aria-controls="wokrDetail" >';
+	                    tbody += '<td class="workId" >' + v.workId + '</td>';
+	                    tbody += '<td>';
+	                    if (v.workState == null) {
+	                        tbody += '-';
+	                    }
+	                    if (v.workState == "요청") {
+	                        tbody +=
+	                            '<button type="button" class="btn btn-sm btn-info btn-rounded waves-effect ">' +
+	                            v.workState + '</button>';
+	                    }
+	                    if (v.workState == "진행") {
+	                        tbody +=
+	                            '<button type="button" class="btn btn-sm btn-success btn-rounded waves-effect ">' +
+	                            v.workState + '</button>';
+	                    }
+	                    if (v.workState == "완료") {
+	                        tbody +=
+	                            '<button type="button" class="btn btn-sm btn-dark btn-rounded waves-effect ">' +
+	                            v.workState + '</button>';
+	                    }
+	                    if (v.workState == "이슈") {
+	                        tbody += '<button type="button" class="btn btn-sm btn-danger btn-rounded waves-effect ">' +
+	                            v.workState + '</button>';
+	                    }
+	                    tbody += '</td>';
+
+	                    // 순위
+	                    if (v.workPriority == null) {
+	                        tbody += '<td>-</td>';
+	                    } else {
+	                        tbody += '<td>';
+
+	                        if (v.workPriority == "낮음") {
+	                            tbody +=
+	                                '<i class="fa fa-arrow-down icon" style="color:orange"></i>낮음';
+	                        }
+	                        if (v.workPriority == "보통") {
+	                            tbody += '<span class="icon">➖</span>보통';
+
+	                        }
+	                        if (v.workPriority == "높음") {
+	                            tbody +=
+	                                '<i class="fa fa-arrow-down icon" style="color:green"></i>높음';
+
+	                        }
+	                        if (v.workPriority == "긴급") {
+	                            tbody += '<span class="icon">🚨</span>긴급';
+
+	                        }
+	                        tbody += '</td>';
+	                    }
+
+	                    tbody += '<td>' + v.workTitle + '</td>';
+
+	                    if (v.workMngr.length == 1) {
+	                        tbody += '<td>' + v.workMngr[0].workMngrNm + '</sapn></td>';
+	                    } else if (v.workMngr.length > 1) {
+	                        tbody +=
+	                            '<td><span data-bs-toggle="tooltip" data-bs-placement="bottom" title="';
+	                        for (var i = 0; i < v.workMngr.length; i++) {
+	                            tbody += v.workMngr[i].workMngrNm;
+	                            if (i != (v.workMngr.length - 1)) {
+	                                tbody += ", ";
+	                            }
+	                        }
+
+	                        tbody += '">' + v.workMngr[0].workMngrNm + '외 ' + (v.workMngr.length - 1) +
+	                            '명</sapn> </td>';
+	                    } else {
+	                        tbody += '<td> - </td>';
+
+	                    }
+
+	                    tbody += '<td>' + toStringYmd(new Date(v.workMdfyDt)) +
+	                        '</td>';
+	                    tbody += '</tr>';
+
+
+	                })
+
+	                $("#tbody").html(tbody);
+
+	                var tooltipTriggerList = [].slice.call(document.querySelectorAll(
+	                    '[data-bs-toggle="tooltip"]'))
+	                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+	                    return new bootstrap.Tooltip(tooltipTriggerEl)
+	                })
+
+	            },
+	            error: function (xhr) {
+	                alert(xhr.status)
+
+	            },
+	            beforeSend: function (xhr) {
+	                xhr.setRequestHeader(header, token)
+	            },
+	            dataType: "json"
+	        })
+	    }
+  
+}) // end $(function)
+    
+console.log("===== ", document.querySelector('#workCntnt'));
+   ClassicEditor
+   .create( document.querySelector( '#workCntnt' ) )
+   .catch( error => {
+       console.error( error );
+   } );
+    
+</script>

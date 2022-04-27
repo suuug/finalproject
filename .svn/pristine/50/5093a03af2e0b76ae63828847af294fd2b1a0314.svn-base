@@ -1,0 +1,115 @@
+package kr.or.workTogether.project.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.workTogether.common.util.FileDownload;
+import kr.or.workTogether.common.util.FileUpload;
+import kr.or.workTogether.common.vo.EmployeeVO;
+import kr.or.workTogether.common.vo.ProjWorkVO;
+import kr.or.workTogether.common.vo.ProjectVO;
+import kr.or.workTogether.common.vo.WorkMngrVO;
+import kr.or.workTogether.project.mapper.ProjectMapper;
+import kr.or.workTogether.project.service.ProjectService;
+
+@Service
+@Transactional
+public class ProjectServiceImpl implements ProjectService {
+	@Autowired
+	ProjectMapper projectMapper;
+	@Autowired
+	FileUpload fileUpload;
+	
+
+	@Override
+	public String projInsert(ProjectVO projectVO) {
+		return projectMapper.projInsert(projectVO);
+	}
+	
+	@Override
+	public List<ProjectVO> projList(String empId) {
+		return projectMapper.projList(empId);
+	}
+
+	@Override
+	public ProjectVO projDetail(String projId) {
+		return projectMapper.projDetail(projId);
+	}
+
+	@Override
+	public List<EmployeeVO> memberList(String projId) {
+		return projectMapper.memberList(projId);
+	}
+
+	@Override
+	public int insertWork(ProjWorkVO projWorkVO) {
+		
+		int insertWork = projectMapper.insertWork(projWorkVO);
+		
+		// 파일 업로드
+		MultipartFile[] uploadFile = projWorkVO.getUploadFile();
+
+		String path = "work/" + projWorkVO.getWorkId();
+
+		String atchRelId = projWorkVO.getWorkId();
+		
+		System.out.println(uploadFile.toString());
+		System.out.println(path);
+		System.out.println(atchRelId);
+		if (uploadFile != null) {
+			List<String> insertFileNames = fileUpload.insert(path, uploadFile, atchRelId);
+		}
+		
+		int insertMngr = 0;
+		
+		if(insertWork>0) {
+			List<String> workMngrList = projWorkVO.getWorkMngr();
+			
+			List<WorkMngrVO> WorkMngrVOList = new ArrayList<>();
+			
+			
+			for(String workMngr : workMngrList) {
+				WorkMngrVO workMngrVO = new WorkMngrVO();
+				workMngrVO.setWorkId(projWorkVO.getWorkId());
+				workMngrVO.setWorkMnrgID(workMngr);
+				
+				WorkMngrVOList.add(workMngrVO);
+			}
+			
+			insertMngr = projectMapper.insertMngr(WorkMngrVOList);
+			
+		}
+		
+		return insertMngr;
+	}
+
+	@Override
+	public List<ProjWorkVO> workList(Map<String, Object> map) {
+		return projectMapper.workList(map);
+	}
+
+	@Override
+	public ProjWorkVO worktDetail(String workId) {
+		return projectMapper.worktDetail(workId);
+	}
+
+	@Override
+	public List<ProjWorkVO> workHomeList(Map<String, Object> map) {
+		return projectMapper.workHomeList(map);
+	}
+
+	@Override
+	public int updateWork(ProjWorkVO projWorkVO) {
+		return projectMapper.updateWork(projWorkVO);
+	}
+
+
+
+
+}

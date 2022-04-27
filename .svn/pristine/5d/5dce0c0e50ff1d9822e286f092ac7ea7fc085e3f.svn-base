@@ -1,0 +1,9 @@
+package kr.or.workTogether.memo.mapper;
+
+import kr.or.workTogether.common.vo.MemoVO;
+
+public interface MemoMapper {
+
+	//메모 작성하기
+	public int writeMemo (MemoVO memoVO);
+}

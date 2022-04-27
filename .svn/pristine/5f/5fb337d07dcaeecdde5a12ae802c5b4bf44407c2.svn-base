@@ -1,0 +1,12 @@
+package kr.or.workTogether.employee.mapper;
+
+import java.util.List;
+
+import kr.or.workTogether.common.vo.EmployeeVO;
+
+public interface EmployeeMapper {
+	//직원 목록
+	public List<EmployeeVO> list();
+	
+	public EmployeeVO read(String empName);
+}

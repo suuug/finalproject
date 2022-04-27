@@ -1,0 +1,28 @@
+     
+사용예)미국에 위치한 각 부서별 평균임금을 계산하고 자신이 속한 부서의 평균급여보다 
+         급여를 더 받는 사원을 조회하시오.
+          Alias 는 사원번호, 사원명, 부서명, 급여, 부서평균급여
+      
+      제출기한 : 10월 15일
+      제출방법 : SEM-PC\D:\공유폴더\oracle\homework01로 전송
+      파일명 : 자신의 이름_제출일자.txt(메모장 등을 이용한 문서로 저장)
+      EX)홍길동_20211015.TXT
+
+
+ SELECT A.EMPLOYEE_ID AS 사원번호,
+              A.EMP_NAME AS 사원명,
+              B.DEPARTMENT_NAME AS 부서명,
+              A.SALARY AS 급여,
+              C.SAL AS 부서평균급여
+         FROM EMP A,DEPT B,(SELECT A.DEPARTMENT_ID AS DEP,
+                             ROUND(AVG(A.SALARY)) AS SAL     --부서평균급여
+                              FROM EMP A,DEPT B, LOCATIONS C
+                             WHERE A.DEPARTMENT_ID=B.DEPARTMENT_ID
+                               AND B.LOCATION_ID=C.LOCATION_ID
+                               AND C.COUNTRY_ID = 'US'
+                             GROUP BY A.DEPARTMENT_ID
+                             ORDER BY 1) C
+        WHERE A.DEPARTMENT_ID=B.DEPARTMENT_ID
+          AND A.DEPARTMENT_ID=C.DEP
+          AND A.SALARY > C.SAL
+        ORDER BY 3, 4 DESC;

@@ -1,0 +1,411 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<!DOCTYPE html>
+
+<link href="/resources/css/project.css" rel="stylesheet" type="text/css" />
+
+<style>
+
+#slider {
+/* 	height: 200px; */
+/* 	width: 100%; */
+	
+}
+.sliderBtn{
+	display: ininline-block; 
+	line-height:200px;
+}
+.projDetail{
+	border: 1px solid #f3f3f3;
+	background-color: #fafafa;
+	border-radius: 6px;
+}
+.projName{
+	font-size: 1.5em;
+	font-weight: 600;
+}
+.titleTh{
+	width: 150px;
+}
+.homeTable{
+	width:100%;	
+	overflow-x:auto;
+    white-space: nowrap;
+}
+.homeTable .table{
+	width: auto;
+}
+</style>
+
+	<div class="card">
+		<div class="card-body">
+			<div class="row mb-3">
+				<div class="col-lg-8">
+					<h2>내 프로젝트</h2>
+				</div>
+				<div class="col-lg-4">
+					<!-- Button trigger modal -->
+					<button type="button" id="insertBtn" class="btn btn-primary"
+						data-toggle="modal" data-target="#insertModal">새프로젝트</button>
+				</div>
+			</div>
+			<div class="row">
+			 	<div class="col-1">
+					 <a href="#" onclick="slider.next()"><i class="fas fa-chevron-left sliderBtn"></i></a>
+			 	</div>
+			 	<div class="col-10">
+				 	<div id="slider">
+						<c:forEach var="projVO" items="${list }">
+				 		<div class="col p-3 pt-5 item projDetail" data-projId="${projVO.projId }">
+								
+							<p class="projName">${projVO.projName}</p>
+						
+<%-- 										<p class="text-truncate">${projVO.projCntnt  }</p> --%>
+							<fmt:formatDate value="${projVO.projStrtDt  }" type="date" />
+							~ 
+							<fmt:formatDate value="${projVO.projEndDt  }" type="date" />
+							<br />
+								
+						</div>
+						</c:forEach>
+				 	</div>
+			 	</div>
+			 
+			 	<div class="col-1">
+					 <a href="#" onclick="slider.prev()"><i class="fas fa-chevron-right sliderBtn"></i></a>
+			 	</div>
+			</div>
+		</div>
+	</div>
+			
+
+	<div class="row">
+		<div class="col-4">
+			<div class="card">
+            	<div class="card-title m-0 p-3">
+            		요청받은 업무 목록
+            	</div>
+                <div class="card-body p-0">
+                   	<div class="table-responsive homeTable">
+                        <table class="table table-hover mb-0 p-0">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th class="titleTh">업무제목</th>
+                                    <th>시작일</th>
+                                    <th>마감일</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    		<c:forEach var="workVO" items="${giveWorkList }">
+                    				<script>console.log("${workVO}");</script>
+                    				<fmt:formatDate value="${workVO.workStrtDt}" type="date" var="workStrtDt" />
+                    				<fmt:formatDate value="${workVO.workEndDt}" type="date" var="workEndDt" />
+	                                <tr data-workId="${workVO.workId}">
+	                                    <th scope="row">
+	                                    	<c:if test="${workVO.workPriority == null }">
+												<span class="badge rounded-pill badge-soft-dark">ㅡㅡ</span>
+											</c:if>
+											<c:if test="${workVO.workPriority == '긴급' }">
+												<span class="badge rounded-pill badge-soft-danger">긴급</span>
+											</c:if>
+											<c:if test="${workVO.workPriority == '높음' }">
+												<span class="badge rounded-pill badge-soft-success">높음</span>
+											</c:if>
+											<c:if test="${workVO.workPriority == '보통' }">
+												<span class="badge rounded-pill badge-soft-dark">보통</span>
+											</c:if>
+											<c:if test="${workVO.workPriority == '낮음' }">
+												<span class="badge rounded-pill badge-soft-warning">낮음</span>
+											</c:if>
+	                                    </th>
+	                                    <td class="text-truncate titleTh">${workVO.workTitle}</td>
+	                                    <td>${workStrtDt}</td>
+	                                    <td>${workEndDt}</td>
+	                                </tr>
+							</c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
+               	  </div>
+               </div>
+          	</div>
+          	
+          	<div class="col-4">
+			<div class="card">
+				<div class="card-title">요청한 업무 목록</div>
+                <div class="card-body">
+                    <c:forEach var="workVO" items="${getWorkList }">
+						<div class="card-text">
+						<p>
+							<c:if test="${workVO.workPriority == null }">
+								<span class="badge rounded-pill badge-soft-dark">ㅡㅡ</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '긴급' }">
+								<span class="badge rounded-pill badge-soft-danger">긴급</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '높음' }">
+								<span class="badge rounded-pill badge-soft-success">높음</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '보통' }">
+								<span class="badge rounded-pill badge-soft-dark">보통</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '낮음' }">
+								<span class="badge rounded-pill badge-soft-warning">낮음</span>
+							</c:if>
+							
+							${workVO.workTitle}</p>
+						</div>
+					</c:forEach>
+                </div>
+               </div>
+          	</div>
+          	
+		<div class="col-4">
+			<div class="card ">
+				<div class="card-title">이슈 목록</div>	
+                <div class="card-body">
+                    <c:forEach var="workVO" items="${issueWorkList }">
+						<div class="card-text">
+							<p>
+							<c:if test="${workVO.workPriority == null }">
+								<span class="badge rounded-pill badge-soft-dark">ㅡㅡ</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '긴급' }">
+								<span class="badge rounded-pill badge-soft-danger">긴급</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '높음' }">
+								<span class="badge rounded-pill badge-soft-success">높음</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '보통' }">
+								<span class="badge rounded-pill badge-soft-dark">보통</span>
+							</c:if>
+							<c:if test="${workVO.workPriority == '낮음' }">
+								<span class="badge rounded-pill badge-soft-warning">낮음</span>
+							</c:if>
+							
+							${workVO.workTitle}</p>
+						</div>
+					</c:forEach>
+                </div>
+           	</div>
+          	</div>
+	</div><!-- row end -->
+			
+
+
+	<!--insert Modal -->
+	<div class="modal" id="insertModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form:form modelAttribute="projectVO" method="post"
+					action="/project/projInsert">
+					<div class="modal-header">
+						<h5 class="modal-title">새프로젝트</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row mb-3">
+							<label for="example-text-input" class="col-sm-4 col-form-label">프로젝트명</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" path="projName" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-text-input" class="col-sm-4 col-form-label">프로젝트설명</label>
+							<div class="col-sm-8">
+								<form:textarea class="form-control" path="projCntnt" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">시작일자</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" type="date" path="projStrtDt" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">만료일자</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" type="date" path="projEndDt" />
+
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">팀원</label>
+							<div class="col-sm-8">
+								<form:input class="form-control" type="date" path="projEndDt" />
+
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button type="submit" id="okBtn" class="btn btn-primary">확인</button>
+					</div>
+					<sec:csrfInput/>
+				</form:form>
+			</div>
+		</div>
+	</div>
+
+<script src="/resources/js/project.js"></script>
+
+	<script type="text/javascript">
+	var backColor =["#00b2ff", "#00b01c", "#fd7900", "#402a9d"]
+	var Slider = function(id, _web, _tab, _mobile, spacing){
+		  var containerWidth = 0;
+		  var sliderItemWidth = 0;
+		  var totalCount = 0;
+		  var spacing = spacing || 10;
+		  var display = _web;
+		  var left = 0;
+		  var interval;
+
+		  var DOM = {
+		    container: function(id){
+		      var dom = document.querySelector('#'+id);
+		      dom.className = 's-container';
+		      dom.style.position = 'relative';
+		      dom.style.overflow = 'hidden';
+		      return dom;
+		    },
+		    slider: function(container){
+		      totalCount = container.children.length;
+
+		      var dom = document.createElement('div');
+		      dom.className = 'slider'
+		      dom.style.position = 'relative';
+		      dom.style.overflow = 'hidden';
+		      dom.style.height = '180px';
+		      dom.style.left = 0;
+		      dom.style.transition = 'left .5s';
+		      return dom;
+		    }
+		  }
+
+		  // DOM 만들기
+		  var container = DOM.container(id);
+		  var slider = DOM.slider(container);
+		  var temp = container.innerHTML;
+		  container.innerHTML = '';
+		  slider.innerHTML = temp;
+		  container.appendChild(slider);
+		  var items = document.querySelector('#'+ id + ' .slider').children;
+		  for(var i=0; i<items.length; i++){
+		    items[i].style.float = 'left';
+		    items[i].style.height = '100%';
+		    items[i].style.width = (sliderItemWidth-spacing)+ 'px';
+// 		    console.log(backColor[Math.floor(Math.random() * backColor.length)]);
+		    items[i].style.borderLeft = '8px solid ' + backColor[Math.floor(Math.random() * backColor.length)];
+		    items[i].style['margin-right'] = spacing+'px'; // 간격
+		  }
+
+		  // 화면 사이즈 수정시 발생하는 이벤트
+		  function resize(){
+		    left = 0;
+		    document.querySelector('#'+ id + ' .slider').style.left = left + 'px';
+
+		    var innerWidth = window.innerWidth;
+		    if(innerWidth >= 1000){
+		      setDisplayCount(_web);
+		    }else if(innerWidth < 1000 && innerWidth >= 768) {
+		      setDisplayCount(_tab);
+		    }else if (innerWidth < 768) {
+		      setDisplayCount(_mobile);
+		    }
+		    
+		    if(display === 1){
+		      spacing = 0;
+		      var items = document.querySelector('#'+ id + ' .slider').children;
+		      for(var i=0; i<items.length; i++){
+		        items[i].style.width = sliderItemWidth + 'px';
+		        items[i].style['margin-right'] = 0 + 'px'; // 간격
+		      }
+		    }
+		  }
+
+		  // 디스플레이 갯수 설정 함수
+		  function setDisplayCount(count) {
+		    display = count;
+
+		    containerWidth = container.offsetWidth + spacing;
+		    sliderItemWidth = containerWidth / display;
+
+		    document.querySelector('#'+ id + ' .slider').style.width = totalCount * sliderItemWidth + spacing * totalCount + 'px';
+		    var items = document.querySelector('#'+ id + ' .slider').children;
+		    for(var i=0; i<items.length; i++){
+		      items[i].style.width = (sliderItemWidth-spacing)+ 'px';
+		    }
+		  }
+
+		  // 반응형 디스플레이 갯수 조절
+		  var isResponsive = _tab != undefined && _mobile != undefined;
+		  if(isResponsive){
+		    window.onresize = resize;
+		  }
+		  resize();
+
+
+		  return {
+		    setDisplayCount: setDisplayCount,
+		    move: function(index){
+		      left = (-1) * sliderItemWidth * index;
+		      document.querySelector('#'+ id + ' .slider').style.left = left + 'px';
+		    },
+		    prev: function(){
+		      left += sliderItemWidth;
+		      var limit = 0;
+		      if(left > limit){
+		        left = limit;
+		      }
+		      document.querySelector('#'+ id + ' .slider').style.left = left + 'px';
+		    },
+		    next: function(){
+		      left -= sliderItemWidth;
+		      var limit = (-1) * sliderItemWidth * (totalCount - display);
+		      if(left < limit){
+		        left = limit;
+		      }
+		      document.querySelector('#'+ id + ' .slider').style.left = left + 'px';
+		    },
+		    auto: function(){
+		      clearInterval(interval);
+		      interval = setInterval(function(){
+		        left -= sliderItemWidth;
+		        var limit = (-1) * sliderItemWidth * (totalCount - display);
+		        if(left < limit){
+		          left = 0;
+		        }
+		        document.querySelector('#'+ id + ' .slider').style.left = left + 'px';
+		      }, 20000)
+		    },
+		    stop: function(){
+		      clearInterval(interval);
+		    }
+		  }
+		}
+
+		var slider = new Slider('slider', 4, 3, 1, 20);
+		slider.auto();
+	
+	$(function() {
+		$("#insertBtn").on("click", function() {
+			$('#insertModal').modal('show')
+		})
+		$("#okBtn").on("click", function() {
+			$('#insertModal').modal('hide')
+		})
+		
+		$(".projDetail").on("click", function(){
+			var projId = $(this).data("projid");
+			location.href = "/project/home?projId="+projId;
+		})
+
+	})
+	</script>

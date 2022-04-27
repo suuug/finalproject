@@ -1,0 +1,14 @@
+package kr.or.workTogether.schedule.service;
+
+import java.util.List;
+
+import kr.or.workTogether.common.vo.CalendarVO;
+import kr.or.workTogether.common.vo.ScheduleVO;
+
+
+public interface ScheduleService {
+
+	//일정보이기
+		public List<CalendarVO> calendar(String schdlId);
+	
+}

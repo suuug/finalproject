@@ -1,0 +1,5 @@
+@charset "UTF-8";
+
+.card-title{
+	border: 0px solid black;
+}

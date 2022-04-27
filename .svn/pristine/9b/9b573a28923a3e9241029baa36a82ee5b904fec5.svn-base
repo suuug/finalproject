@@ -1,0 +1,148 @@
+$(function(){
+//	alert("js파일");
+//	alert(projId);
+	$("#home").on("click", function(){
+		var projId = $(this).attr("projid");
+		location.href = "/project/home?projId="+projId;
+	});
+	$("#work").on("click", function(){
+		var projId = $(this).attr("projid");
+		location.href = "/project/work?projId="+projId;
+	});
+	
+	$("#calendal").on("click", function(){
+		var projId = $(this).attr("projid");
+		location.href = "/project/calendal?projId="+projId;
+	});
+	
+	$("#ganttchart").on("click", function(){
+		var projId = $(this).attr("projid");
+		location.href = "/project/ganttchart?projId="+projId;
+	});
+	
+	
+	
+})
+
+//function workList(){
+//		
+////		console.log($(this).val());
+////		division = $(this).val();`
+//		var division = $("input[name='division']:checked").val();
+////	 	console.log(division);
+//		
+//		var wkStateObj = $("input[name='wkState']:checked");
+////	 	console.log(wkStateObj);
+//		
+//		var priorityObj = $("input[name='priority']:checked");
+////	 	console.log(priorityObj);
+//
+//		if(wkStateObj.length < 1 || priorityObj.length < 1){
+//			alert("최소 한 개 이상 선택하세요!")
+//			event.preventDefault()
+//			return false;
+//		}
+//		
+//		var wkStateList = []; 
+//		for(var i=0; i<wkStateObj.length; i++){
+////	 		console.log(wkStateObj[i].value);
+//			wkStateList.push(wkStateObj[i].value)
+//		}
+//		
+//		var priorityList= []; 
+//		for(var i=0; i<priorityObj.length; i++){
+////	 		console.log(wkStateObj[i].value);
+//			priorityList.push(priorityObj[i].value)
+//		}
+//		
+//		$.ajax({
+//			url: "/project/select",
+//			type: "POST",
+//			contentType : "application/json; charset=utf-8",
+//			data: JSON.stringify({'empId' : "EMPL00004"
+//				,'projId' : "${projWorkVO.projId}"
+//				,'division' : division
+//				,'wkStateList' : wkStateList
+//				,'priorityList' : priorityList
+//			}),
+//			success: function(res) {
+////					console.log(res);
+//
+//				var tbody = "";
+//				$.each(res, function(i, v) {
+//					
+////						var workId = "'" + v.workId + "'";
+//					tbody += '<tr class="wkDetail" data-bs-toggle="offcanvas" data-bs-target="#wokrDetail" aria-controls="wokrDetail" >';
+//					tbody += '<td class="workId" >'+v.workId+'</td>';
+//					tbody += '<td>';
+//					if(v.workState==null){
+//						tbody += '-';
+//					}
+//					if(v.workState=="요청"){
+//						tbody += '<button type="button" class="btn btn-sm btn-info btn-rounded waves-effect ">'+v.workState +'</button>';
+//					}
+//					if(v.workState=="진행"){
+//						tbody += '<button type="button" class="btn btn-sm btn-success btn-rounded waves-effect ">'+v.workState +'</button>';
+//					}
+//					if(v.workState=="완료"){
+//						tbody += '<button type="button" class="btn btn-sm btn-dark btn-rounded waves-effect ">'+v.workState +'</button>';
+//					}
+//					if(v.workState=="이슈"){
+//						tbody += '<button type="button" class="btn btn-sm btn-danger btn-rounded waves-effect ">'+v.workState +'</button>';
+//					}
+//					tbody += '</td>';
+//					
+//					// 순위
+//					if(v.workPriority==null){
+//						tbody += '<td>-</td>';
+//					}else{
+//		                tbody += '<td>';
+//						
+//						if(v.workPriority=="낮음"){
+//							tbody += '<i class="fa fa-arrow-down icon" style="color:orange"></i>낮음'; 	
+//						}
+//						if(v.workPriority=="보통"){
+//							tbody += '<span class="icon">➖</span>보통'; 	
+//							
+//						}
+//						if(v.workPriority=="높음"){
+//							tbody += '<i class="fa fa-arrow-down icon" style="color:green"></i>높음'; 	
+//							
+//						}
+//						if(v.workPriority=="긴급"){
+//							tbody += '<span class="icon">🚨</span>긴급'; 	
+//								
+//						}
+//		                tbody += '</td>';
+//					}   
+//					
+//	                tbody += '<td>'+v.workTitle +'</td>';
+//
+//	                if(v.workMngr.length == 1){
+//		                tbody += '<td><a data-toggle="tooltip" data-placement="top" title="'+v.workMngr[0]+'">' + v.workMngr[0] + '</a></td>';
+//	                }else if(v.workMngr.length > 1){
+//		                tbody += '<td data-toggle="tooltip" data-placement="top" title="Tooltip on top">' + v.workMngr[0] + '외 '+ (v.workMngr.length-1) +'명 </td>';
+//	                }else{
+//	                	tbody += '<td> - </td>';
+//	                	
+//	                }
+//	                
+//	                tbody += '<td>'+ toStringByFormat(new Date(v.workMdfyDt)) +'</td>';
+//	                tbody += '</tr>';
+//	                
+//	            
+//				})
+//				
+//				$("#tbody").html(tbody);
+//				
+//			},
+//			error: function(xhr) {
+//				alert(xhr.status)
+//
+//			},
+//			beforeSend:function(xhr) { 
+//				xhr.setRequestHeader(header, token)
+//			},
+//			dataType: "json"
+//		})
+//	} //workList() end	

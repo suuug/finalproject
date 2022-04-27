@@ -1,0 +1,51 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<div class="row mb-2">
+	<div class="col-lg-8">
+		<h2>${sessionScope.projName }</h2>
+	</div>
+	<div class="col-lg-3">
+		<button type="button" id="" class="btn btn-primary">팀원초대</button>
+	</div>
+</div>
+<div id="projTab" class="row mb-3">
+	<ul class="nav nav-tabs nav-tabs-custom nav-justified" role="tablist">
+	   <li class="nav-item">
+	       <a class="nav-link" id="home" data-bs-toggle="tab" href="#home1" role="tab" data-projId="${sessionScope.projId }">
+	           <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
+	           <span class="d-none d-sm-block">홈</span> 
+	       </a>
+	   </li>
+	   <li class="nav-item">
+	       <a class="nav-link" id="work" data-bs-toggle="tab" href="#profile1" role="tab"  data-projId="${sessionScope.projId }" >
+	           <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+	           <span class="d-none d-sm-block">업무</span> 
+	       </a>
+	   </li>
+	   <li class="nav-item">
+	       <a class="nav-link" id="ganttchart" data-bs-toggle="tab" href="#messages1" role="tab" data-projId="${sessionScope.projId }" >
+	           <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
+	           <span class="d-none d-sm-block">간트차트</span>   
+	       </a>
+	   </li>
+	   <li class="nav-item">
+	       <a class="nav-link" id="calendarTab" data-bs-toggle="tab" href="#settings1" role="tab" data-projId="${sessionScope.projId }" >
+	           <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
+	           <span class="d-none d-sm-block">캘린더</span>    
+	       </a>
+	   </li>
+	   <li class="nav-item">
+	       <a class="nav-link" data-bs-toggle="tab" href="#settings1" role="tab">
+	           <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
+	           <span class="d-none d-sm-block">진행도</span>    
+	       </a>
+	   </li>
+	   <li class="nav-item">
+	       <a class="nav-link" id="file" data-bs-toggle="tab" href="#settings1" role="tab"  data-projId="${sessionScope.projId }">
+	           <span class="d-block d-sm-none"><i class="fas fa-cog"></i></span>
+	           <span class="d-none d-sm-block">파일</span>    
+	       </a>
+	   </li>
+	</ul>
+</div> 
+

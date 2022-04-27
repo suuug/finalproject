@@ -1,0 +1,14 @@
+package kr.or.workTogether.common.util;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.workTogether.attach.mapper.AttachMapper;
+
+@Service
+public class FileDownload {
+
+	@Autowired
+	AttachMapper attachMapper;
+	
+}

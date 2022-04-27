@@ -1,0 +1,479 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<!DOCTYPE html>
+
+<link href="/resources/css/project.css" rel="stylesheet" type="text/css" />
+
+
+<style>
+.card-title{
+	height: auto;
+}
+
+</style>
+
+
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="card">
+			<div class="card-body">
+				<%@ include file="includeTab.jsp" %>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+
+    <div class="col-lg-1">
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div id="pie_chart" class="apex-charts" dir="ltr"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="row card-body">
+            	<h5>참여자</h5>
+		            <c:forEach var="projmem" items="${memlist }">
+	            	<div class="row">
+			            <div class="col-1 thumb size30 projmem" style="background-image: url('${projmem.empPhoto }'); background-size: cover;" data-empid="${projmem.empId }">
+			             </div>
+			           <div class="col-4 m-2">
+			            	${projmem.empName } 
+			           </div>
+		            </div>
+		            </c:forEach>
+            </div>
+        </div>
+    </div>
+ </div>
+ 
+<div class="row">
+
+    <div class="col-lg-1">
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div id="line_chart" class="apex-charts" dir="ltr"></div>   
+            </div>
+        </div>
+    </div>
+<!--     <div class="col-lg-3"> -->
+<!--         <div class="card"> -->
+<!--             <div class="card-body"> -->
+
+           
+<!--             </div> -->
+<!--         </div> -->
+<!--     </div> -->
+ </div>
+
+<c:forEach var="workVO"  items="${workList }" >	
+<div class="row">
+	<div class="col-lg-1">
+    </div>
+	<div class="col-md-6 col-xl-6 homeWkDetail">
+	    <div class="card">
+			<form:form  id="wokrDetailForm" modelAttribute="projWorkVO" method="POST" action="/project/updateWork" >
+       			<form:hidden path="workRqstr" value="${workVO.workRqstr }"/>
+       			<form:hidden path="projId" value="${sessionScope.projId }" />
+				<form:hidden path="workId" value="${workVO.workId }" />
+		       	<div class="row p-3 card-title ">
+		       		<div class="col-1 thumb size40" style="background-image: url('${workVO.workRqstrPhoto }');  background-size: cover;"></div>
+		       		<div class="col-9">
+		       			<span class="rqstrNm">${workVO.workRqstrNm }</span>&ensp;
+		       			<fmt:formatDate var="workWrtDt" value="${workVO.workWrtDt }" pattern="yyyy-MM-dd hh:mm"/>
+		       			<span class="wrtDt">${workWrtDt }</span><br>
+						<form:hidden path="workTitle" class="form-control"  value="${workVO.workTitle }" />
+		       			<span class="workTitleSpan">${workVO.workTitle }</span>
+		       		</div>
+		           	<div class="col-2">
+						<a href="#" id="editBtn" class="text-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Edit" aria-label="Edit"><i id="wkUpdate" class="mdi mdi-pencil font-size-18"></i></a>
+						<a href="#" id="delBtn" class="text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Delete" aria-label="Delete"><i id="wkdelete" class="mdi mdi-trash-can font-size-18"></i></a>
+		           	</div>
+		       	</div> <!-- end card-title -->
+		       	<div class="card-body">
+		       			<form:hidden path="projId" value=""/>
+<!-- 		       		<div class="p-3"> -->
+<%-- 			       		<form:hidden path="workTitle" class="form-control"  value="${workVO.workTitle }" /> --%>
+<%-- 			       		<p>${workVO.workTitle }</p> --%>
+<!-- 					</div> -->
+					
+		       		<div class="p-3">
+						<form:hidden path="workCntnt" class="form-control"  value="${workVO.workCntnt }" />
+			       		<p>${workVO.workCntnt }</p>
+					</div>
+					
+					<div class="row p-3">
+						<div class="col-2">
+							<i class="fas fa-clock fa-2x "></i>
+						</div>
+						<div class="col-10">
+							<form:hidden path="workState" value="${workVO.workState }"/>				
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='요청' }">btn-info</c:if> btn-rounded waves-effect wkStateBtn" id="request">요청</button>						
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='진행' }">btn-success</c:if> btn-rounded waves-effect wkStateBtn" id="ing">진행</button>						
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='완료' }">btn-dark</c:if> btn-rounded waves-effect wkStateBtn" id="complete">완료</button>						
+							<button type="button" class="btn btn-secondary <c:if test="${workVO.workState =='이슈' }">btn-danger</c:if> btn-rounded waves-effect wkStateBtn" id="issue">이슈</button>
+						</div>						
+					</div>
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-user-alt fa-2x "></i>
+							</div>
+							<div class="col-9 dropdown">
+								<div class="col-auto"> 	
+								  <button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropMember" data-bs-toggle="dropdown" aria-expanded="false">
+								    담당자
+								  </button>
+								<ul  class="dropdown-menu" aria-labelledby="dropMember">
+								 	<c:forEach var="empVO" items="${memlist }">
+									<li><a class="dropdown-item projmem" href="" data-empId="${empVO.empId }">${empVO.empName }</a></li>
+									</c:forEach>
+								</ul>
+								</div>
+								<div id="memDiv" class="col-auto">
+									<c:forEach var="workMngrList" items="${workVO.workMngr }">
+										<button type='button' class='btn btn-outline-info waves-effect waves-light membtn'>
+											<i class='ri-close-line align-middle me-2'></i>
+											${workMngrList.workMngrNm }
+										</button>
+						
+										<input id="workMngr" name="workMngr" value="${workMngrList.workMngrId }" data-workMngrNm="${workMngrList.workMngrNm }" type="hidden">
+									</c:forEach>
+								</div>
+							</div> 
+						</div>
+					</div> 
+						
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-calendar fa-2x "></i>
+							</div>
+							<div class="col-10">
+								<label for="workStrtDt" class="dateLabel">시작일자</label>
+								<input type="hidden" class="form-control" name="oldWorkStrtDt" type="date" />
+								<fmt:formatDate value="${workVO.workStrtDt }" pattern="yyyy-MM-dd" var="workStrtDt"/>					
+								<form:input class="form-control" path="workStrtDt" type="date" value="${workStrtDt }"/>
+							</div>
+						</div>
+					</div>
+						
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-calendar fa-2x "></i>
+							</div>
+							<div class="col-10">
+								<label for="workEndDt" class="dateLabel">마감일자</label>
+								<input type="hidden" class="form-control" name="oldWorkStrtDt" type="date" />						
+								<fmt:formatDate value="${workVO.workEndDt }" pattern="yyyy-MM-dd" var="workEndDt"/>					
+								<form:input class="form-control" path="workEndDt" type="date" value="${workEndDt }"/>						
+							</div>
+						</div>
+					</div>
+					
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-flag fa-2x "></i>
+							</div>
+							<div class="col-10 dropdown">
+								<form:hidden path="workPriority" value="${workVO.workPriority }"/>						
+								
+								
+								 <c:if test="${workVO.workPriority == null }">
+								 	<button class="btn btn-outline-secondary waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	업무순위
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '낮음' }">
+								 	<button class="btn btn-outline-warning waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<i class="fa fa-arrow-down icon"  style="color:orange"></i>낮음
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '보통' }">
+								 	<button class="btn btn-outline-dark waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<span class="icon">➖</span>보통
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '높음' }">
+								 	<button class="btn btn-outline-success waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<i class="fa fa-arrow-up icon"  style="color:green"></i>높음
+								 	</button>
+								 </c:if>
+								 <c:if test="${workVO.workPriority == '긴급' }">
+								 	<button class="btn btn-outline-danger waves-effect dropdown-toggle" type="button" id="dropPriority" data-bs-toggle="dropdown" aria-expanded="false">
+								    	<span class="icon">🚨</span>긴급
+								 	</button>
+								 </c:if>
+								<ul class="dropdown-menu" aria-labelledby="dropPriority">
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "낮음" ><i class="fa fa-arrow-down icon"  style="color:orange"></i>낮음</a></li>
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "보통"><span class="icon">➖</span>보통</a></li>
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "높음" ><i class="fa fa-arrow-up icon"  style="color:green"></i>높음</a></li>
+									<li><a class="dropdown-item priorityBtn" href="#" data-priority = "긴급" ><span class="icon">🚨</span>긴급</a></li>
+								</ul>
+							</div>    
+						</div>
+					</div>
+					
+					<div class="p-3">
+						<div class="row">
+							<div class="col-2">
+								<i class="fas fa-chart-bar fa-2x "></i>
+							</div>
+							<div class="col-6">
+								 <div class="progress">
+									<form:hidden path="workProgress" value="${workVO.workProgress }"/>						
+	                       			<div class="progress-bar" role="progressbar" style="width: ${workVO.workProgress }%;" aria-valuenow="${workVO.workProgress }" aria-valuemin="0" aria-valuemax="100">${workVO.workProgress }%</div>
+	                    		</div>
+							</div>
+						</div>
+					</div>
+					<hr>
+					<button type="button" class="btn btn-light btn-sm waves-effect waves-light rplShow">댓글보기</button>
+					<button type="button" class="btn btn-light btn-sm waves-effect waves-light rplHide" style="display:none;">댓글숨기기</button>
+		       	</div> <!-- end card-body -->
+				<sec:csrfInput/>
+			</form:form> <!-- end form:form -->
+			<div class="rplListDiv">
+
+			</div>
+		</div> <!-- end card -->
+	</div> <!-- end col -->
+</div> <!-- end row -->
+	
+<!--    <script >console.log("${workVO }")</script>       -->
+<!--    <script >console.log("${memlist }")</script>       -->
+</c:forEach>
+
+<%@ include file="modal.jsp"%>
+
+<!-- apexcharts -->
+<script src="/resources/dist/assets/libs/apexcharts/apexcharts.min.js"></script>
+<script src="/resources/js/project.js"></script>
+<script>
+
+	// 현재 업무량 가져오기
+	var labelsData = [];
+	var seriesData = [];
+		
+	$.ajax({
+	    url: "/project/projChart",
+	    type: "GET",
+	    data: {
+	        'projId': projId
+	    },
+	    async: false,
+	    success: function (res) {
+	        
+	        labelsData = Object.keys(res);
+	        $.each(res, function(i, v) {
+	        	seriesData.push(v);
+	        })
+	
+	    },
+	    dataType: "json"
+	})
+	
+	options = {
+	    chart: {
+	        height: 320,
+	        type: "pie"
+	    },
+	    title: {
+            text: "현재업무현황",
+            align: "left"
+        },
+// 	    series: [44, 55, 41, 17],
+	    series: seriesData,
+// 	    labels: ["Series 1", "Series 2", "Series 3", "Series 4", "Series 5"],
+	    labels: labelsData,
+// 	    colors: ["#6fbe36", "#6c6ff5", "#fcb92c", "#2ec8f1", "#ff5d5d"],
+	    colors: ["#6c6ff5", "#2ec8f1", "#00b19c", "#ff5d5d"],
+	    legend: {
+	        show: !0,
+	        position: "top",
+	        horizontalAlign: "right",
+	        verticalAlign: "right",
+	        floating: !1,
+	        fontSize: "14px",
+	        offsetX: 0,
+	        offsetY: 5,
+	        formatter: function(seriesName, opts) {
+	            return [seriesName, " (", opts.w.globals.series[opts.seriesIndex], ")"]
+	        }
+        
+	    },
+	    responsive: [{
+	        breakpoint: 600,
+	        options: {
+	            chart: {
+	                height: 240
+	            },
+	            legend: {
+	                show: !1
+	            }
+	        }
+	    }]
+	};
+	(chart = new ApexCharts(document.querySelector("#pie_chart"), options)).render();
+	
+	
+	// 일일 업무량 가져오기
+	var memObj = $(".projmem");
+	var memList = [];
+	var seriesData = [];  	
+	var categoriesData = [];
+	
+	for(var i=0; i < memObj.length; i++){
+		memList.push($(memObj[i]).data("empid"));
+	}
+	
+	$.ajax({
+	    url: "/project/workCountDate",
+	    type: "POST",
+	    contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({
+	        'projId' : projId,
+	        'memList' : memList
+	    }),
+	    async: false,
+	    success: function (res) {
+	        console.log("workCountDate : ", res);
+		        
+// 		        name: "이중호",
+// 	            data: [26, 24, 32, 36, 33, 31, 12]
+		     
+	        
+	        for(var i=0; i < memList.length; i++){
+	        	
+				var empName = '';
+				var cntList = [];
+				var ymd = '';
+	        	for(var j=0; j < res.length; j++){
+// 			        	console.log("res[i] : ", res[i].EMP_ID);
+	        		if(memList[i] == res[j].EMP_ID){
+	        			empName = res[j].EMP_NAME
+	        			cntList.push(res[j].CNT);
+		        		console.log("res[j]  ", res[j].EMP_ID);
+		        		ymd = res[j].YMD;
+						if(i==0){
+							categoriesData.push(ymd);
+							
+						}
+	        		}
+	        	}
+        		var seriesTemp = {
+        				name : empName,
+        				data : cntList
+        			}
+        		seriesData.push(seriesTemp);
+			}
+
+       		console.log("categoriesData", categoriesData);
+	
+	    },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader(header, token)
+        },
+	    dataType: "json"
+	})
+		
+	var line_options = {
+        chart: {
+            height: 380,
+            type: "line",
+            zoom: {
+                enabled: !1
+            },
+            toolbar: {
+                show: !1
+            }
+        },
+        colors: ["#6c6ff5", "#4f9dff", "#00B19C", "#ff9b2d", "#ff5d5d"],
+        dataLabels: {
+            enabled: !1
+        },
+        stroke: {
+            width: [3, 3],
+            curve: "straight"
+        },
+        series: seriesData,
+//         series: [
+        	
+//         	{
+// 	            name: "이중호",
+// 	            data: [26, 24, 32, 36, 33, 31, 12]
+// 	        } 
+        	
+// 	        ,{
+// 	            name: "손영흔",
+// 	            data: [14, 11, 16, 12, 17, 13, 12]
+// 	        }
+	        
+//         ],
+        title: {
+            text: "일일업무량",
+            align: "left"
+        },
+        grid: {
+            row: {
+                colors: ["transparent", "transparent"],
+                opacity: .2
+            },
+            borderColor: "#f1f1f1"
+        },
+        markers: {
+            style: "inverted",
+            size: 6
+        },
+        xaxis: {
+//             categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+            categories: categoriesData,
+            title: {
+                text: "Month"
+            }
+        },
+        yaxis: {
+            title: {
+                text: "Temperature"
+            },
+            min: 0,
+            max: 20
+        },
+        legend: {
+            position: "top",
+            horizontalAlign: "right",
+            floating: !0,
+            offsetY: -25,
+            offsetX: -5
+        },
+        responsive: [{
+            breakpoint: 600,
+            options: {
+                chart: {
+                    toolbar: {
+                        show: !1
+                    }
+                },
+                legend: {
+                    show: !1
+                }
+            }
+        }]
+    },
+    
+    chart = new ApexCharts(document.querySelector("#line_chart"), line_options);
+	chart.render();
+</script>

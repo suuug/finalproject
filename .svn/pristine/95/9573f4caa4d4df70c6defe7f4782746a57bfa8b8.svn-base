@@ -1,0 +1,21 @@
+package kr.or.workTogether.common.util;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.workTogether.attach.mapper.AttachMapper;
+
+@Service
+public class FileList {
+
+	@Autowired
+	AttachMapper attachMapper;
+
+	//첨부파일 목록 보이기
+	public List<Map<String, Object>> selectFileList(int atchRelId) {
+		return null;
+	}
+}

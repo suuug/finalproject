@@ -1,0 +1,279 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+
+<div class="card">
+	<div class="card-body">
+		<div
+			class="page-title-box d-flex align-items-center justify-content-between">
+			<h4 class="mb-0">
+				<a href="/attendance/apply">근태신청</a>
+			</h4>
+			<div class="page-title-right">
+				<button type="button" class="btn btn-sm btn-light waves-effect waves-light"><a href="/attendance/apply">나의 신청현황</a></button>
+				<button type="button" class="btn btn-sm btn-light waves-effect waves-light"><a href="/attendance/applyMem">사원의 신청현황</a></button>
+			</div>
+		</div>
+
+		<br>
+		<h2 align="center">2022년 4월</h2>
+		<br> <br>
+
+		<div align="right">
+			<button type="button" data-bs-toggle="modal"
+				data-bs-target="#insertModal"
+				class="btn btn-sm btn-primary waves-effect waves-light"
+				id="ajax-home">재택신청</button>
+			<button type="button" data-bs-toggle="modal"
+				data-bs-target="#insertModal"
+				class="btn btn-sm btn-secondary waves-effect waves-light"
+				id="ajax-outside">외근신청</button>
+			<button type="button" data-bs-toggle="modal"
+				data-bs-target="#insertModal"
+				class="btn btn-sm btn-success waves-effect waves-light"
+				id="ajax-annual">연차신청</button>
+			<button type="button" data-bs-toggle="modal"
+				data-bs-target="#insertModal"
+				class="btn btn-sm btn-info waves-effect waves-light"
+				id="ajax-vacation">휴가신청</button>
+
+			<!-- 			<button type="button" class="btn btn-sm btn-dark waves-effect waves-light">Dark</button> -->
+			<!-- 			<button type="button" class="btn btn-sm btn-link waves-effect">Link</button> -->
+			<!-- 			<button type="button" class="btn btn-sm btn-light waves-effect">외근신청</button> -->
+
+		</div>
+		<br>
+
+
+		<!-- Modal -->
+		<div class="modal fade" id="insertModal" tabindex="-1"
+			aria-labelledby="modalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<%-- 					<form:form modelAttribute="atndnDlyVO" method="post" --%>
+					<%-- 						action="/project/projInsert"> --%>
+					<div class="modal-header">
+						<h5 class="modal-title">신청하기</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">신청
+								시작일자</label>
+							<div class="col-sm-8">
+								<%-- 									<form:input class="form-control" type="date" path="projStrtDt" /> --%>
+								<input class="form-control" type="date" id="projStrtDt" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-date-input" class="col-sm-4 col-form-label">신청
+								마감일자</label>
+							<div class="col-sm-8">
+								<%-- 									<form:input class="form-control" type="date" path="projStrtDt" /> --%>
+								<input class="form-control" type="date" id="projEndDt" />
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="example-text-input" class="col-sm-4 col-form-label">신청자</label>
+							<div class="col-sm-8">
+								<%-- 									<form:input class="form-control" path="projName" /> --%>
+								<input class="form-control" id="projName" />
+							</div>
+						</div>
+
+						<div class="row mb-3">
+							<label for="example-text-input" class="col-sm-4 col-form-label">신청
+								내용</label>
+							<div class="col-sm-8">
+								<%-- 									<form:textarea class="form-control" path="projCntnt" /> --%>
+								<textarea placeholder="내용을 입력하세요" class="form-control"
+									id="projCntnt" rows="10"></textarea>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">취소</button>
+						<button type="submit" id="okBtn" class="btn btn-primary">제출하기</button>
+					</div>
+					<sec:csrfInput />
+					<%-- 					</form:form> --%>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="table-responsive">
+			<table class="table mb-0">
+				<thead align="center">
+					<tr>
+						<th>주차</th>
+						<th>월</th>
+						<th>화</th>
+						<th>수</th>
+						<th>목</th>
+						<th>금</th>
+						<th>비고</th>
+					</tr>
+				</thead>
+				<tbody align="center">
+					<tr>
+						<th scope="row">1</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">2</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">3</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">4</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+					<tr>
+						<th scope="row">5</th>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+						<td>Table cell</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<br> <br> <br>
+
+		<div class="card">
+			<div class="card-body">
+				<h5 style="color: red">
+					<strong>연차 한 눈에 보기</strong>
+				</h5>
+				<div class="table-responsive">
+					<table class="table table-bordered mb-0">
+						<thead>
+							<tr>
+								<th>잔여 연차</th>
+								<th>사용 연차</th>
+								<th>총 연차</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td scope="row">4</td>
+								<td>5</td>
+								<td>9</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="card">
+			<div class="card-body">
+				<h4 class="card-title">연차 사용내역</h4>
+				<div class="table-responsive">
+					<table class="table table-bordered mb-0">
+						<thead>
+							<tr>
+								<th>이름</th>
+								<th>부서명</th>
+								<th>연차 사용기간</th>
+								<th>사용 연차</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td scope="row">허민정</td>
+								<td>인사팀</td>
+								<td>2022/04/04 ~ 2022/04/04</td>
+								<td>1</td>
+							</tr>
+							<tr>
+								<td scope="row">2</td>
+								<td>Jacob</td>
+								<td>Thornton</td>
+								<td>@fat</td>
+							</tr>
+							<tr>
+								<td scope="row">3</td>
+								<td>Larry</td>
+								<td>the Bird</td>
+								<td>@twitter</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="card">
+			<div class="card-body">
+				<h4 class="card-title">연차 발생내역</h4>
+				<div class="table-responsive">
+					<table class="table table-bordered mb-0">
+						<thead>
+							<tr>
+								<th>등록일</th>
+								<th>등록자</th>
+								<th>발생연차일</th>
+								<th>연차발생사유</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td scope="row">2022/04/04</td>
+								<td>인사관리자</td>
+								<td>1일</td>
+								<td>근로보상</td>
+							</tr>
+							<tr>
+								<td scope="row">2</td>
+								<td>Jacob</td>
+								<td>Thornton</td>
+								<td>@fat</td>
+							</tr>
+							<tr>
+								<td scope="row">3</td>
+								<td>Larry</td>
+								<td>the Bird</td>
+								<td>@twitter</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
